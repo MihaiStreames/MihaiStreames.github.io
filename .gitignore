@@ -1,0 +1,6 @@
+# Ruby
+Gemfile.lock
+.bundle
+
+# Obsidian
+.obsidian
