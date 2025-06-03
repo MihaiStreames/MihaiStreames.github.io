@@ -4,3 +4,10 @@ Gemfile.lock
 
 # Obsidian
 .obsidian
+
+# Jekyll
+_site
+.sass-cache
+.jekyll-cache
+.jekyll-metadata
+vendor
