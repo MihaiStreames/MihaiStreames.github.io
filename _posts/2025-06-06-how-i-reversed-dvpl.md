@@ -50,7 +50,7 @@ level>8</
 1Rol
 ```
 
-Most of it was gibberish, but I could make out fragments of what looked like XML data mixed with compressed binary data. The presence of readable strings suggested the files contained familiar data that had been processed somehow.
+Most of it was gibberish, but I could make out fragments of XML data (it's in the file name, duh) mixed with compressed binary data. The presence of readable strings suggested the files contained processed data.
 
 ## Binary Analysis: Finding the Magic
 
