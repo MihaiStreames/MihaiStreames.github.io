@@ -17,7 +17,7 @@ excerpt: How I discovered and decoded the DVPL file format used by World of Tank
 
 ## The Discovery
 
-I was trying to learn SQL for a Database course exam for Uni and I decided to do that by making a tank database, since I play a lot of World of Tanks Blitz as a way to chill out.
+I was trying to learn SQL for a Database course exam for Uni and I decided to do that by making a tank database, since I play a lot of [World of Tanks Blitz](https://wargaming.net/en/games/wotb) as a way to chill out.
 
 I spent a few hours MANUALLY adding data, and I quickly ran out of it, since the [Wiki](https://wot-blitz.fandom.com) only has partial data. I looked on other sites, reversed [protobuf](https://protobuf.dev/overview/) files, looked on the [Main Wiki](https://wiki.wargaming.net/en/WoT_Blitz)... Nothing helpful. I decided to check the game files, where I stumbled across `.dvpl` files. These weren't standard formats I recognized, so naturally, I had to figure out what they were.
 
