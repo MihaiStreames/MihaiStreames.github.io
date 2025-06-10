@@ -4,7 +4,6 @@ title: How I Reversed World of Tanks Blitz's Custom DVPL Format
 date: 2025-06-06 12:00:00 +0200
 categories:
   - reverse-engineering
-  - gaming
   - file-formats
 tags:
   - world-of-tanks-blitz
@@ -14,7 +13,6 @@ tags:
   - hexdump
 excerpt: How I discovered and decoded the DVPL file format used by World of Tanks Blitz, from initial string discovery to building a complete converter tool.
 ---
-
 ## The Discovery
 
 I was trying to learn SQL for a Database course exam for Uni and I decided to do that by making a tank database, since I play a lot of [World of Tanks Blitz](https://wargaming.net/en/games/wotb) as a way to chill out.
