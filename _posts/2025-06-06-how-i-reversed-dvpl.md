@@ -13,6 +13,7 @@ tags:
   - hexdump
 excerpt: How I discovered and decoded the DVPL file format used by World of Tanks Blitz, from initial string discovery to building a complete converter tool.
 ---
+
 ## The Discovery
 
 I was trying to learn SQL for a Database course exam for Uni and I decided to do that by making a tank database, since I play a lot of [World of Tanks Blitz](https://wargaming.net/en/games/wotb) as a way to chill out.
@@ -27,8 +28,8 @@ strings list.xml.dvpl | head -20
 
 ```
 <root>
-	<Ch01_Type59>
-		<id>0</id
+ <Ch01_Type59>
+  <id>0</id
 userString>#china_vehicles:8
 '</(
 description8
@@ -44,7 +45,7 @@ bRammer
 wetCombatPack_class1
 aimingStabilizer_Mk
 collectible</
-level>8</	
+level>8</ 
 1Rol
 ```
 
@@ -160,6 +161,7 @@ Value 4: 2
 The fourth value being consistently 2 across all files strongly suggested a compression type. For the other values, I made guesses based on common file format patterns:
 
 **Typical compressed file formats often store:**
+
 - Original (uncompressed) size
 - Compressed size
 - Checksum for integrity
@@ -198,10 +200,10 @@ This worked perfectly! The decompressed data was exactly 34436 bytes and started
 ```xml
 Decompressed size: 34436
 <root>
-	<Ch01_Type59>
-		<id>0</id>
-		<userString>#china_vehicles:Ch01_Type59</userString>
-		<descrip
+ <Ch01_Type59>
+  <id>0</id>
+  <userString>#china_vehicles:Ch01_Type59</userString>
+  <descrip
 ```
 
 For the third value (2670330284), I suspected it was a CRC32 checksum of the compressed data:
@@ -229,11 +231,12 @@ original_size, compressed_size, crc32_checksum, compression_type, magic = struct
 ```
 
 Or in **simpler** terms:
+
 - The `<IIII4s` format string tells Python how to interpret the binary data:
-	- `<`       = little-endian byte order (least significant byte first)
-	- `I`       = unsigned 32-bit integer (4 bytes each)
-	- `IIII` = four consecutive 32-bit integers
-	- `4s`     = exactly 4 bytes as a string (our "DVPL" magic)
+ 	- `<`       = little-endian byte order (least significant byte first)
+ 	- `I`       = unsigned 32-bit integer (4 bytes each)
+ 	- `IIII` = four consecutive 32-bit integers
+ 	- `4s`     = exactly 4 bytes as a string (our "DVPL" magic)
 - So `<IIII4s` reads: "four little-endian integers followed by a 4-byte string"
 
 ## The Complete DVPL Format

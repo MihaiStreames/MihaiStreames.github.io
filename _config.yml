@@ -1,33 +1,38 @@
 # Site settings
 title: NotesByMihuu
-description: >- # this means to ignore newlines until "baseurl:"
-  Personal notes and findings, mostly about technology (and sometimes other things). 
+description: >-
+  Personal notes and findings, mostly about technology (and sometimes other things).
   A space to document my journey and share insights.
 baseurl: ""
-url: ""
+url: "https://mihaistreames.github.io"
 github_username: MihaiStreames
+
+# SEO & Social
+author:
+  name: MihaiStreames
+lang: en_US
+twitter:
+  card: summary_large_image
 
 # Build settings
 theme: minima
 plugins:
   - jekyll-feed
+  - jekyll-seo-tag
 
-# Exclude from processing.
-# The following items will not be processed, by default.
-# Any item listed under the `exclude:` key here will be automatically added to
-# the internal "default list".
-#
-# Excluded items can be processed by explicitly listing the directories or
-# their entries' file path in the `include:` list.
-#
-# exclude:
-#   - .sass-cache/
-#   - .jekyll-cache/
-#   - gemfiles/
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules/
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+# Theme settings
+minima:
+  skin: dark
+
+# Excludes
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
