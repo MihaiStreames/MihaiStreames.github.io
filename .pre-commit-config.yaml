@@ -1,0 +1,61 @@
+fail_fast: true
+
+repos:
+  - repo: builtin
+    hooks:
+      - id: trailing-whitespace
+        priority: 0
+      - id: end-of-file-fixer
+        priority: 0
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        priority: 0
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.25.2
+    hooks:
+      - id: zizmor
+        priority: 0
+
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.8.3
+    hooks:
+      - id: prettier
+        additional_dependencies:
+          - prettier@3.8.3
+          - prettier-plugin-svelte@3.5.2
+          - prettier-plugin-packagejson@3.0.2
+        types_or: [ts, javascript, svelte, json, yaml, html]
+        priority: 2
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-frontmatter
+        priority: 1
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        priority: 2
+
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: bunx eslint
+        language: system
+        types_or: [svelte, ts, javascript]
+        pass_filenames: false
+        priority: 1
+
+      - id: svelte-check
+        name: svelte-check
+        entry: bunx svelte-check --tsconfig ./tsconfig.json
+        language: system
+        types_or: [svelte, ts, javascript]
+        pass_filenames: false
+        priority: 1

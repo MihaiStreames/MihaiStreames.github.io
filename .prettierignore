@@ -1,0 +1,5 @@
+.claude/
+.svelte-kit/
+build/
+node_modules/
+bun.lock

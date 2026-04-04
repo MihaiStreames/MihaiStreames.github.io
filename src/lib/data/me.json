@@ -1,0 +1,79 @@
+{
+  "handle": "MihaiStreames",
+  "role": "cs student (graduating sept 2026)",
+  "focus": "backend development",
+  "languages": ["py", "rs", "c", "cpp", "sh", "ts"],
+  "also": "music producer since 2020 (edm / ableton)",
+  "projects": [
+    {
+      "name": "DAWPresence",
+      "url": "https://github.com/MihaiStreames/DAWPresence",
+      "description": "discord rich presence for your DAWs (rust btw)"
+    },
+    {
+      "name": "Downwell.AI",
+      "url": "https://github.com/MihaiStreames/Downwell.AI",
+      "description": "dqn agent for Downwell (WIP)"
+    },
+    {
+      "name": "psnpp-gist",
+      "url": "https://github.com/MihaiStreames/psnpp-gist",
+      "description": "companion userscript for psnp+ (adds gist sync support)"
+    },
+    {
+      "name": "PoneyHot",
+      "url": "https://github.com/MihaiStreames/PoneyHot",
+      "description": "cool little observability stack project for uni",
+      "collaborators": [
+        {
+          "name": "BelmuTM",
+          "url": "https://github.com/BelmuTM"
+        }
+      ]
+    },
+    {
+      "name": "fmod-jna",
+      "url": "https://github.com/MihaiStreames/fmod-jna",
+      "description": "jna wrapper around fmod for java",
+      "collaborators": [
+        {
+          "name": "big-lip-bob",
+          "url": "https://github.com/big-lip-bob"
+        }
+      ]
+    },
+    {
+      "name": "guard-core-rs",
+      "url": "https://github.com/rennf93/guard-core-rs",
+      "description": "porting guard-core to rust",
+      "collaborators": [
+        {
+          "name": "rennf93",
+          "url": "https://github.com/rennf93"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "label": "github",
+      "url": "https://github.com/MihaiStreames",
+      "display": "github.com/mihaistreames"
+    },
+    {
+      "label": "soundcloud",
+      "url": "https://soundcloud.com/officialoptik",
+      "display": "soundcloud.com/officialoptik"
+    },
+    {
+      "label": "youtube",
+      "url": "https://www.youtube.com/@HappyGuySmiley",
+      "display": "youtube.com/happyguysmiley"
+    },
+    {
+      "label": "ko-fi",
+      "url": "https://ko-fi.com/mihaistreames",
+      "display": "ko-fi.com/mihaistreames"
+    }
+  ]
+}
