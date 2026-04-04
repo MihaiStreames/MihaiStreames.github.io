@@ -1,0 +1,46 @@
+{
+	"name": "mihaistreames.github.io",
+	"description": "Personal site and blog, built with SvelteKit",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"author": {
+		"name": "MihaiStreames",
+		"url": "https://mihaistreames.github.io"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/MihaiStreames/MihaiStreames.github.io"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@sveltejs/adapter-static": "^3.0.10",
+		"@sveltejs/kit": "^2.20.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"eslint": "^10.2.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.17.0",
+		"globals": "^17.4.0",
+		"mdsvex": "^0.12.5",
+		"prettier": "^3.8.1",
+		"prettier-plugin-svelte": "^3.5.1",
+		"shiki": "^3.4.0",
+		"svelte": "^5.30.0",
+		"svelte-check": "^4.2.0",
+		"typescript": "^5.8.0",
+		"typescript-eslint": "^8.58.0",
+		"vite": "^6.3.0"
+	}
+}

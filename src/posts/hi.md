@@ -1,7 +1,6 @@
 ---
-layout: post
 title: Hello
-date: 2025-06-03 02:28:00 +0200
+date: "2025-06-03"
 categories:
   - introduction
 tags:

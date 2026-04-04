@@ -1,0 +1,76 @@
+{
+  "handle": "MihaiStreames",
+  "role": "CS Student @ ULB (graduating Sept 2026)",
+  "focus": "backend development",
+  "languages": ["Python", "Rust", "C/C++", "Java", "Lua"],
+  "also": "music producer since 2020 (EDM / Ableton + Serum)",
+  "projects": [
+    {
+      "name": "Velox",
+      "url": "https://github.com/velox-sh",
+      "org": "velox-sh",
+      "description": "fast and nice tools for developers - Python and Rust",
+      "children": [
+        {
+          "name": "tokount",
+          "url": "https://github.com/velox-sh/tokount",
+          "description": "the fastest line counter, written in Rust with SIMD"
+        },
+        {
+          "name": "ghlang",
+          "url": "https://github.com/velox-sh/ghlang",
+          "description": "pretty language charts generator, uses tokount for local mode"
+        },
+        {
+          "name": "tidy",
+          "url": "https://github.com/velox-sh/tidy",
+          "description": "import fixing tool for Python, learning AST parsing - WIP"
+        }
+      ]
+    },
+    {
+      "name": "DAWPresence",
+      "url": "https://github.com/MihaiStreames/DAWPresence",
+      "description": "tracks what you do inside your DAW - Rust + Iced, 7MB RAM, 8MB binary"
+    },
+    {
+      "name": "thin32",
+      "url": "https://github.com/Thin32",
+      "description": "smallest and fastest Windows replacement apps (alt-tab, shell, taskbar)",
+      "collaborators": [
+        {
+          "name": "big-lip-bob",
+          "url": "https://github.com/big-lip-bob"
+        }
+      ]
+    },
+    {
+      "name": "ContaraNAS",
+      "url": "https://github.com/MihaiStreames/ContaraNAS",
+      "description": "NAS management app in Python + Tauri, server-driven UI - postponed"
+    },
+    {
+      "name": "fmod-jna",
+      "url": "https://github.com/MihaiStreames/fmod-jna",
+      "description": "JNA wrapper around FMOD for Java, uni project",
+      "collaborators": [
+        {
+          "name": "big-lip-bob",
+          "url": "https://github.com/big-lip-bob"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "label": "github",
+      "url": "https://github.com/MihaiStreames",
+      "display": "github.com/MihaiStreames"
+    },
+    {
+      "label": "music",
+      "url": "https://soundcloud.com/officialoptik",
+      "display": "soundcloud.com/officialoptik"
+    }
+  ]
+}

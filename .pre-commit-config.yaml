@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: svelte-check
+        name: svelte-check
+        entry: bun run check
+        language: system
+        types_or: [svelte, ts, javascript]
+        pass_filenames: false
+
+      - id: eslint
+        name: eslint
+        entry: bun run lint
+        language: system
+        types_or: [svelte, ts, javascript]
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml

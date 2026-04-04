@@ -1,0 +1,235 @@
+/* catppuccin mocha palette */
+:root {
+	--ctp-rosewater: #f5e0dc;
+	--ctp-flamingo: #f2cdcd;
+	--ctp-pink: #f5c2e7;
+	--ctp-mauve: #cba6f7;
+	--ctp-red: #f38ba8;
+	--ctp-maroon: #eba0ac;
+	--ctp-peach: #fab387;
+	--ctp-yellow: #f9e2af;
+	--ctp-green: #a6e3a1;
+	--ctp-teal: #94e2d5;
+	--ctp-sky: #89dceb;
+	--ctp-sapphire: #74c7ec;
+	--ctp-blue: #89b4fa;
+	--ctp-lavender: #b4befe;
+	--ctp-text: #cdd6f4;
+	--ctp-subtext1: #bac2de;
+	--ctp-subtext0: #a6adc8;
+	--ctp-overlay2: #9399b2;
+	--ctp-overlay1: #7f849c;
+	--ctp-overlay0: #6c7086;
+	--ctp-surface2: #585b70;
+	--ctp-surface1: #45475a;
+	--ctp-surface0: #313244;
+	--ctp-base: #1e1e2e;
+	--ctp-mantle: #181825;
+	--ctp-crust: #11111b;
+
+	/* spacing scale */
+	--space-xs: 0.15rem;
+	--space-sm: 0.35rem;
+	--space-md: 0.75rem;
+	--space-lg: 1.25rem;
+}
+
+/* reset */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	font-size: 16px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	font-family: "JetBrains Mono", monospace;
+	background-color: var(--ctp-base);
+	color: var(--ctp-text);
+	line-height: 1.7;
+	min-height: 100vh;
+}
+
+/* layout */
+.site-wrapper {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 2rem 1.5rem;
+}
+
+/* python-style decorators for nav */
+.py-decorator {
+	color: var(--ctp-mauve);
+}
+
+.py-keyword {
+	color: var(--ctp-green);
+}
+
+.py-func {
+	color: var(--ctp-blue);
+}
+
+.py-string {
+	color: var(--ctp-yellow);
+}
+
+.py-comment {
+	color: var(--ctp-overlay1);
+	font-style: italic;
+}
+
+.py-param {
+	color: var(--ctp-peach);
+}
+
+.py-self {
+	color: var(--ctp-red);
+}
+
+/* links */
+a {
+	color: var(--ctp-rosewater);
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+a:hover {
+	color: var(--ctp-flamingo);
+	text-decoration: underline;
+}
+
+/* headings */
+h1,
+h2,
+h3,
+h4 {
+	color: var(--ctp-rosewater);
+}
+
+h1 {
+	font-size: 1.5rem;
+}
+h2 {
+	font-size: 1.25rem;
+}
+h3 {
+	font-size: 1.1rem;
+}
+
+/* code - inline */
+:not(pre) > code {
+	background-color: var(--ctp-surface0);
+	color: var(--ctp-rosewater);
+	padding: 0.15rem 0.35rem;
+	border-radius: 4px;
+	font-size: 0.9rem;
+}
+
+/* code blocks - shiki generates these */
+pre {
+	background-color: var(--ctp-mantle) !important;
+	border: 1px solid var(--ctp-surface0);
+	border-radius: 6px;
+	padding: 1rem;
+	overflow-x: auto;
+	font-size: 0.85rem;
+	line-height: 1.5;
+}
+
+pre code {
+	background: none;
+	padding: 0;
+	border-radius: 0;
+	font-size: inherit;
+	color: inherit;
+}
+
+/* blockquotes */
+blockquote {
+	border-left: 3px solid var(--ctp-mauve);
+	padding-left: 1rem;
+	color: var(--ctp-subtext1);
+}
+
+/* horizontal rule */
+hr {
+	border: none;
+	border-top: 1px solid var(--ctp-surface1);
+	margin: 2rem 0;
+}
+
+/* images */
+img {
+	max-width: 100%;
+	border-radius: 6px;
+}
+
+/* tables */
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+th,
+td {
+	border: 1px solid var(--ctp-surface1);
+	padding: 0.5rem 0.75rem;
+	text-align: left;
+}
+
+th {
+	background-color: var(--ctp-surface0);
+	color: var(--ctp-rosewater);
+}
+
+/* selection */
+::selection {
+	background-color: var(--ctp-surface2);
+	color: var(--ctp-rosewater);
+}
+
+/*
+ * prose: spacing for markdown-rendered content only (blog posts)
+ * everything outside .prose has zero default margins on elements
+ */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+	margin-top: 1.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.prose p {
+	margin-bottom: 1rem;
+}
+
+.prose ul,
+.prose ol {
+	margin-bottom: 1rem;
+	padding-left: 1.5rem;
+}
+
+.prose li {
+	margin-bottom: 0.25rem;
+}
+
+.prose pre {
+	margin-bottom: 1rem;
+}
+
+.prose blockquote {
+	margin-bottom: 1rem;
+}
+
+.prose table {
+	margin-bottom: 1rem;
+}

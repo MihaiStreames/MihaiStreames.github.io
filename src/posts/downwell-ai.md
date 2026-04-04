@@ -1,7 +1,6 @@
 ---
-layout: post
 title: Teaching an AI to Play Downwell (and Failing Spectacularly)
-date: 2026-01-10 18:00:00 +0200
+date: "2026-01-10"
 categories:
   - ai
   - gaming
@@ -46,10 +45,10 @@ def extract_hp(screen):
     hp_area = screen[49:67, 30:194]
     hp_area = cv.cvtColor(hp_area, cv.COLOR_BGR2GRAY)
     hp_area = cv.threshold(hp_area, 0, 255, cv.THRESH_BINARY_INV | cv.THRESH_OTSU)[1]
-    
+
     hp = pytesseract.image_to_string(hp_area, config='--psm 6')
     hp = hp.replace(' ', '').replace('\n', '')
-    
+
     if hp in vals:  # Manual error mapping because OCR sucks
         hp = vals[hp]
     else:
@@ -64,7 +63,7 @@ By the next day, I gave up on computer vision entirely:
 ```bash
 # Commit: df916a5 - May 6, 1:57 AM
 "removed need for finding the player or enemies
-using external counters such as hp and gem count, 
+using external counters such as hp and gem count,
 we can theoretically tell if we killed an enemy or not, and so on"
 ```
 
@@ -157,7 +156,7 @@ The project collected dust. A few halfhearted attempts:
 
 ```bash
 # September 29, 2023: "refactoring"
-# December 24, 2023: "minor adjustments mainly some refactoring 
+# December 24, 2023: "minor adjustments mainly some refactoring
 #                     to permit future usage of the AI on Linux"
 # February 6, 2024: "ideas flowing"
 ```
@@ -179,7 +178,7 @@ def run_episode():
         action = agent.act(state)
         next_state, reward, done = env.step(action)
         memory.add(state, action, reward, next_state, done)
-    
+
     # Only train AFTER the episode ends
     if episode % 10 == 0:
         agent.replay(batch_size=32)  # Too late!
@@ -199,13 +198,13 @@ def step(self):
         reward = self.reward_calc.calculate_reward(
             self.last_state, current_state
         )
-        
+
         # Store experience
         self.memory.add(
-            self.last_state, self.last_action, 
+            self.last_state, self.last_action,
             reward, current_state, done
         )
-        
+
         # Train IMMEDIATELY
         if self.memory.size > self.config.agent.train_start:
             loss = self.agent.replay(batch_size=512)
@@ -225,7 +224,7 @@ def get_state(self):
     frame = self.capture_engine.capture()
     processed = self._preprocess_frame(frame)
     self.frame_stack.append(processed)
-    
+
     # Stack 4 frames together: (84, 84, 4)
     state = np.stack(self.frame_stack, axis=2)
     return state
@@ -254,7 +253,7 @@ class AgentThreader(Thread):
             state = self.state_queue.get()
             action = self.agent.act(state)
             self.action_queue.put(action)
-            
+
             # Train while we wait
             if self.memory.size > batch_size:
                 self.agent.replay()
@@ -269,23 +268,23 @@ Early reward systems were too simple. The final version rewarded:
 ```python
 def calculate_reward(self, state, next_state):
     reward = 0
-    
+
     # Going deeper is the main goal
     if next_state.depth > state.depth:
         reward += (next_state.depth - state.depth) * 2.0
-    
+
     # But don't hit walls
     if self._near_boundary(next_state.xpos):
         reward -= 5.0
-    
+
     # Combos are good
     if next_state.combo > state.combo:
         reward += min(next_state.combo * 0.5, 10)
-    
+
     # Death is very bad
     if next_state.hp <= 0:
         reward -= 100
-    
+
     # Clip to prevent instability
     return np.clip(reward, -100, 100)
 ```

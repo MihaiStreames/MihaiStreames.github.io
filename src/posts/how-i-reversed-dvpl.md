@@ -1,7 +1,6 @@
 ---
-layout: post
 title: How I Reversed World of Tanks Blitz's Custom DVPL Format
-date: 2025-06-06 12:00:00 +0200
+date: "2025-06-06"
 categories:
   - reverse-engineering
   - file-formats
@@ -26,7 +25,7 @@ My first instinct was to dump strings from the files to see if there were any re
 strings list.xml.dvpl | head -20
 ```
 
-```
+```text
 <root>
  <Ch01_Type59>
   <id>0</id
@@ -45,7 +44,7 @@ bRammer
 wetCombatPack_class1
 aimingStabilizer_Mk
 collectible</
-level>8</ 
+level>8</
 1Rol
 ```
 
@@ -61,7 +60,7 @@ hexdump -C list.xml.dvpl | tail -10
 
 This revealed something interesting at the end of the file:
 
-```
+```text
 00000ea0  11 36 af 0e 07 a8 7b 1f  35 f5 2f 14 06 3a 00 0f  |.6....{.5./..:..|
 00000eb0  07 08 21 05 3d 00 0f 03  08 28 06 44 00 0f 5f 13  |..!.=....(.D.._.|
 00000ec0  fe 0f 70 05 9c 09 86 02  00 96 02 00 80 05 35 54  |..p...........5T|
@@ -85,7 +84,7 @@ With the magic number found, I needed to understand what came before it.
 tail -c 32 list.xml.dvpl | hexdump -C
 ```
 
-```
+```text
 00000000  06 9e 02 80 3c 2f 72 6f  6f 74 3e 0a 84 86 00 00  |....</root>.....|
 00000010  10 0f 00 00 ac 01 2a 9f  02 00 00 00 44 56 50 4c  |......*.....DVPL|
 00000020
@@ -101,7 +100,7 @@ To understand what these integers represent, I compared several DVPL files to lo
 tail -c 32 customization.xml.dvpl | hexdump -C
 ```
 
-```
+```text
 00000000  0e 15 00 80 3c 2f 72 6f  6f 74 3e 0a 23 16 00 00  |....</root>.#...|
 00000010  54 03 00 00 6e 18 a0 f9  02 00 00 00 44 56 50 4c  |T...n.......DVPL|
 00000020
@@ -111,7 +110,7 @@ tail -c 32 customization.xml.dvpl | hexdump -C
 tail -c 32 Ch01_Type59.xml.dvpl | hexdump -C
 ```
 
-```
+```text
 00000000  03 8d 00 80 3c 2f 72 6f  6f 74 3e 0a 2f 2a 00 00  |....</root>./*..|
 00000010  0f 0f 00 00 e8 c7 c4 31  02 00 00 00 44 56 50 4c  |.......1....DVPL|
 00000020
@@ -121,7 +120,7 @@ tail -c 32 Ch01_Type59.xml.dvpl | hexdump -C
 tail -c 32 guns.xml.dvpl | hexdump -C
 ```
 
-```
+```text
 00000000  72 b0 00 80 3c 2f 72 6f  6f 74 3e 0a ae e4 01 00  |r...</root>.....|
 00000010  90 27 00 00 a2 3d d5 7b  02 00 00 00 44 56 50 4c  |.'...=.{....DVPL|
 00000020
@@ -151,7 +150,7 @@ print(f"Value 3: {val3}")
 print(f"Value 4: {val4}")
 ```
 
-```
+```text
 Value 1: 34436
 Value 2: 3856
 Value 3: 2670330284
@@ -173,7 +172,7 @@ Let me test this hypothesis by checking if the file sizes make sense:
 ls -l list.xml.dvpl
 ```
 
-```
+```text
 -rwxr-xr-x 1 user user 3876 Jun  4 17:25 list.xml.dvpl*
 ```
 
@@ -186,7 +185,7 @@ import lz4.block
 
 with open('list.xml.dvpl', 'rb') as f:
     payload = f.read(3856)  # Read just the compressed data
-    
+
 try:
     decompressed = lz4.block.decompress(payload, uncompressed_size=34436)
     print(f"Decompressed size: {len(decompressed)}")
@@ -197,7 +196,7 @@ except Exception as e:
 
 This worked perfectly! The decompressed data was exactly 34436 bytes and started with proper XML:
 
-```xml
+```text
 Decompressed size: 34436
 <root>
  <Ch01_Type59>
@@ -217,7 +216,7 @@ print(f"Footer CRC32: {val3}")
 print(f"Match: {calculated_crc == val3}")
 ```
 
-```
+```text
 Calculated CRC32: 2670330284
 Footer CRC32: 2670330284
 Match: True
@@ -233,17 +232,17 @@ original_size, compressed_size, crc32_checksum, compression_type, magic = struct
 Or in **simpler** terms:
 
 - The `<IIII4s` format string tells Python how to interpret the binary data:
- 	- `<`       = little-endian byte order (least significant byte first)
- 	- `I`       = unsigned 32-bit integer (4 bytes each)
- 	- `IIII` = four consecutive 32-bit integers
- 	- `4s`     = exactly 4 bytes as a string (our "DVPL" magic)
+  - `<` = little-endian byte order (least significant byte first)
+  - `I` = unsigned 32-bit integer (4 bytes each)
+  - `IIII` = four consecutive 32-bit integers
+  - `4s` = exactly 4 bytes as a string (our "DVPL" magic)
 - So `<IIII4s` reads: "four little-endian integers followed by a 4-byte string"
 
 ## The Complete DVPL Format
 
 After this systematic analysis, I determined the DVPL format structure:
 
-```
+```text
 [Compressed Payload Data]
 [Footer - 20 bytes:]
   - Original Size    (4 bytes, little-endian uint32)
