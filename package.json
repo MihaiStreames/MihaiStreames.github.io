@@ -36,7 +36,7 @@
 		"mdsvex": "^0.12.5",
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.5.1",
-		"shiki": "^3.4.0",
+		"shiki": "^4.0.2",
 		"svelte": "^5.30.0",
 		"svelte-check": "^4.2.0",
 		"typescript": "^5.8.0",
