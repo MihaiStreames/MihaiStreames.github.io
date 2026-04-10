@@ -2,7 +2,7 @@
 	import type { PageData } from "./$types";
 	import { resolve } from "$app/paths";
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -15,7 +15,7 @@
 		<h1>{data.meta.title}</h1>
 		<p class="meta">
 			<span class="py-comment"># {data.meta.date}</span>
-			{#if data.meta.categories?.length}
+			{#if data.meta.categories.length > 0}
 				<span class="categories">
 					{#each data.meta.categories as cat, i (cat)}
 						{#if i > 0}{" "}{/if}<span class="py-decorator">@{cat}</span>

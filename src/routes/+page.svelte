@@ -3,7 +3,7 @@
 	import { resolve } from "$app/paths";
 	import me from "$lib/data/me.json";
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 </script>
 
 <section>

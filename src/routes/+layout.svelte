@@ -1,14 +1,15 @@
 <script lang="ts">
 	import "../app.css";
+	import type { Snippet } from "svelte";
 	import { page } from "$app/state";
 	import { resolve } from "$app/paths";
 
-	let { children } = $props();
+	const { children }: { children: Snippet } = $props();
 
 	const nav = [
 		{ path: "/", label: "home" },
 		{ path: "/blog", label: "blog" },
-	];
+	] as const;
 </script>
 
 <svelte:head>
@@ -24,9 +25,9 @@
 			{#each nav as { path, label }, i (path)}
 				{#if i > 0}<span class="py-comment">,</span>{/if}
 				<a
-					href={resolve(path)}
 					class:active={page.url.pathname === path ||
-						(path !== "/" && page.url.pathname.startsWith(path))}>{label}</a
+						(path !== "/" && page.url.pathname.startsWith(path))}
+					href={resolve(path)}>{label}</a
 				>
 			{/each}
 		</nav>

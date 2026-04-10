@@ -2,7 +2,7 @@
 	import type { PageData } from "./$types";
 	import { resolve } from "$app/paths";
 
-	let { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 </script>
 
 <h1><span class="py-keyword">def</span> <span class="py-func">blog</span>():</h1>
@@ -15,7 +15,7 @@
 			</a>
 			<span class="py-comment"> # {post.date}</span>
 			<p class="excerpt">{post.excerpt}</p>
-			{#if post.categories?.length}
+			{#if post.categories.length > 0}
 				<p class="tags">
 					{#each post.categories as cat, i (cat)}
 						{#if i > 0}{" "}{/if}<span class="py-decorator">@{cat}</span>

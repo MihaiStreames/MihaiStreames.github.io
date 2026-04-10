@@ -1,6 +1,7 @@
+import type { PostMeta } from "$lib/posts";
 import { getPosts } from "$lib/posts";
 
-export async function load() {
-	const posts = await getPosts();
+export function load(): { recentPosts: PostMeta[] } {
+	const posts = getPosts();
 	return { recentPosts: posts.slice(0, 3) };
 }
