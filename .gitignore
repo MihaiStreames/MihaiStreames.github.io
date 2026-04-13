@@ -139,5 +139,9 @@ build/
 
 # Claude Code
 .claude/
+CLAUDE.md
+
+# Scripts
+scripts/
 
 # End of https://www.toptal.com/developers/gitignore/api/node

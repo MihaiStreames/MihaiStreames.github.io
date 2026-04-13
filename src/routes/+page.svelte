@@ -1,10 +1,37 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
-	import { resolve } from "$app/paths";
 	import me from "$lib/data/me.json";
+	import PostCard from "$lib/components/PostCard.svelte";
 
 	const { data }: { data: PageData } = $props();
 </script>
+
+<svelte:head>
+	<title>MihaiStreames</title>
+	<meta name="description" content="Personal site and blog of MihaiStreames." />
+
+	<!-- open graph (facebook, discord, slack, etc.) -->
+	<meta content="website" property="og:type" />
+	<meta content="MihaiStreames" property="og:title" />
+	<meta content="Personal site and blog of MihaiStreames." property="og:description" />
+	<meta content="https://mihaistreames.github.io/" property="og:url" />
+	<meta content="https://mihaistreames.github.io/og-image.png" property="og:image" />
+	<meta content="1200" property="og:image:width" />
+	<meta content="630" property="og:image:height" />
+	<meta content="MihaiStreames" property="og:site_name" />
+
+	<!-- twitter/x card -->
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="MihaiStreames" />
+	<meta name="twitter:description" content="Personal site and blog of MihaiStreames." />
+	<meta name="twitter:image" content="https://mihaistreames.github.io/og-image.png" />
+
+	<!-- discord uses OG tags primarily, theme-color helps with embed accent -->
+	<meta name="theme-color" content="#f5e0dc" />
+
+	<!-- additional seo -->
+	<link href="https://mihaistreames.github.io/" rel="canonical" />
+</svelte:head>
 
 <section>
 	<div class="code-block">
@@ -101,10 +128,7 @@
 	<section>
 		<p class="section-header"><span class="py-comment"># recent posts</span></p>
 		{#each data.recentPosts as post (post.slug)}
-			<p>
-				<a href={resolve("/blog/[slug]", { slug: post.slug })}>{post.title}</a>
-				<span class="py-comment"> # {post.date}</span>
-			</p>
+			<PostCard compact {post} />
 		{/each}
 	</section>
 {/if}

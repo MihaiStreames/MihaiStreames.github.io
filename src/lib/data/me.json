@@ -9,29 +9,29 @@
       "name": "Velox",
       "url": "https://github.com/velox-sh",
       "org": "velox-sh",
-      "description": "fast and nice tools for developers - Python and Rust",
+      "description": "fast and nice tools for developers with Python and Rust",
       "children": [
         {
           "name": "tokount",
           "url": "https://github.com/velox-sh/tokount",
-          "description": "the fastest line counter, written in Rust with SIMD"
+          "description": "the fastest line counter, written in Rust"
         },
         {
           "name": "ghlang",
           "url": "https://github.com/velox-sh/ghlang",
-          "description": "pretty language charts generator, uses tokount for local mode"
+          "description": "pretty language charts generator for GitHub and local repos"
         },
         {
           "name": "tidy",
           "url": "https://github.com/velox-sh/tidy",
-          "description": "import fixing tool for Python, learning AST parsing - WIP"
+          "description": "import fixing tool for Python - WIP"
         }
       ]
     },
     {
       "name": "DAWPresence",
       "url": "https://github.com/MihaiStreames/DAWPresence",
-      "description": "tracks what you do inside your DAW - Rust + Iced, 7MB RAM, 8MB binary"
+      "description": "discord presence for your DAW, made with Rust, 3MB binary"
     },
     {
       "name": "thin32",
@@ -52,7 +52,7 @@
     {
       "name": "fmod-jna",
       "url": "https://github.com/MihaiStreames/fmod-jna",
-      "description": "JNA wrapper around FMOD for Java, uni project",
+      "description": "JNA wrapper around FMOD for Java",
       "collaborators": [
         {
           "name": "big-lip-bob",
