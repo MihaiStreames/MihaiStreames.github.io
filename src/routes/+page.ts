@@ -7,6 +7,6 @@ import { getPosts } from "$lib/posts";
  * @returns Object with recentPosts, the three newest posts by date.
  */
 export function load(): { recentPosts: PostMeta[] } {
-	const posts = getPosts();
-	return { recentPosts: posts.slice(0, 3) };
+  const posts = getPosts();
+  return { recentPosts: posts.slice(0, 3) };
 }

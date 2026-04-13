@@ -7,6 +7,6 @@ import { getPosts } from "$lib/posts";
  * @returns Object with posts, all posts sorted newest-first.
  */
 export function load(): { posts: PostMeta[] } {
-	const posts = getPosts();
-	return { posts };
+  const posts = getPosts();
+  return { posts };
 }

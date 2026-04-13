@@ -1,53 +1,53 @@
 {
-	"name": "mihaistreames.github.io",
-	"private": true,
-	"version": "1.0.0",
-	"type": "module",
-	"description": "Personal site and blog, built with SvelteKit",
-	"author": {
-		"name": "MihaiStreames",
-		"url": "https://mihaistreames.github.io"
-	},
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/MihaiStreames/MihaiStreames.github.io"
-	},
+  "name": "mihaistreames.github.io",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Personal site and blog, built with SvelteKit",
+  "author": {
+    "name": "MihaiStreames",
+    "url": "https://mihaistreames.github.io"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MihaiStreames/MihaiStreames.github.io"
+  },
   "homepage": "https://mihaistreames.github.io",
-	"keywords": [
+  "keywords": [
     "blog",
     "personal",
     "sveltekit",
     "mdsvex"
   ],
   "scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"lint": "eslint .",
-		"lint:fix": "eslint . --fix",
-		"format": "prettier --write .",
-		"format:check": "prettier --check ."
-	},
-	"devDependencies": {
-		"@eslint/js": "^10.0.1",
-		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.57.1",
-		"@sveltejs/vite-plugin-svelte": "^7.0.0",
-		"eslint": "^10.2.0",
-		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-svelte": "^3.17.0",
-		"globals": "^17.4.0",
-		"mdsvex": "^0.12.7",
-		"prettier": "^3.8.2",
-		"prettier-plugin-svelte": "^3.5.1",
-		"shiki": "^4.0.2",
-		"svelte": "^5.55.2",
-		"svelte-check": "^4.4.6",
-		"typescript": "^6.0.2",
-		"typescript-eslint": "^8.58.1",
-		"vite": "^8.0.8"
-	}
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.57.1",
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.17.0",
+    "globals": "^17.4.0",
+    "mdsvex": "^0.12.7",
+    "prettier": "^3.8.2",
+    "prettier-plugin-svelte": "^3.5.1",
+    "shiki": "^4.0.2",
+    "svelte": "^5.55.2",
+    "svelte-check": "^4.4.6",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.1",
+    "vite": "^8.0.8"
+  }
 }
