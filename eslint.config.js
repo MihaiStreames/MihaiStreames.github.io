@@ -71,7 +71,11 @@ export default defineConfig([
           leadingUnderscore: "allow",
         },
         { selector: "function", format: ["camelCase"] },
-        { selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },
+        {
+          selector: "parameter",
+          format: ["camelCase"],
+          leadingUnderscore: "allow",
+        },
       ],
 
       "no-console": ["error", { allow: ["warn", "error"] }],

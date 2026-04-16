@@ -52,13 +52,13 @@ Most of it was gibberish, but I could make out fragments of XML data (it's in th
 
 ## Binary Analysis: Finding the Magic
 
-When dealing with unknown binary formats, I always start with a hex dump to look for patterns:
+Next step, hex dump:
 
 ```bash
 hexdump -C list.xml.dvpl | tail -10
 ```
 
-This revealed something interesting at the end of the file:
+Something caught my eye at the end of the file:
 
 ```text
 00000ea0  11 36 af 0e 07 a8 7b 1f  35 f5 2f 14 06 3a 00 0f  |.6....{.5./..:..|
@@ -94,7 +94,7 @@ The DVPL magic is exactly 4 bytes, and there are 16 bytes before it. This sugges
 
 ## Reverse Engineering the Structure
 
-To understand what these integers represent, I compared several DVPL files to look for patterns. This is where things got interesting:
+To understand what these integers represent, I compared several DVPL files:
 
 ```bash
 tail -c 32 customization.xml.dvpl | hexdump -C
@@ -229,18 +229,11 @@ Perfect match! So the complete structure is:
 original_size, compressed_size, crc32_checksum, compression_type, magic = struct.unpack('<IIII4s', footer_data)
 ```
 
-Or in **simpler** terms:
-
-- The `<IIII4s` format string tells Python how to interpret the binary data:
-  - `<` = little-endian byte order (least significant byte first)
-  - `I` = unsigned 32-bit integer (4 bytes each)
-  - `IIII` = four consecutive 32-bit integers
-  - `4s` = exactly 4 bytes as a string (our "DVPL" magic)
-- So `<IIII4s` reads: "four little-endian integers followed by a 4-byte string"
+If you're not familiar with `struct.unpack`, `<IIII4s` just means "four little-endian uint32s followed by a 4-byte string." [Python docs](https://docs.python.org/3/library/struct.html#format-characters) explain the format characters.
 
 ## The Complete DVPL Format
 
-After this systematic analysis, I determined the DVPL format structure:
+So, putting it all together:
 
 ```text
 [Compressed Payload Data]
@@ -257,4 +250,4 @@ After this systematic analysis, I determined the DVPL format structure:
 
 ## The Code
 
-You can find the complete DVPL converter implementation [here](https://github.com/MihaiStreames/WOTDB/blob/main/src/data/dvpl_converter.py) (when I make it public).
+You can find the DVPL converter on GitHub: [MihaiStreames/dvpl-converter](https://github.com/MihaiStreames/dvpl-converter).

@@ -20,7 +20,7 @@
   <meta content="MihaiStreames" property="og:site_name" />
 
   <!-- twitter/x card -->
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={data.meta.title} />
   <meta name="twitter:description" content={data.meta.excerpt} />
   <meta name="twitter:image" content={data.meta.image} />
