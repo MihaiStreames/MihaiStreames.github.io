@@ -166,4 +166,4 @@ The project is now being redesigned in Rust with WASM-sandboxed modules. The SDU
 
 The core idea survived the rewrite. "Make a renderer, send it trees" turns out to be architecture-agnostic. That's probably the most satisfying thing about this whole detour - the pattern I discovered reading Airbnb blog posts is still the foundation of the project, even as everything else is changing around it.
 
-The full architecture for the Rust version is documented in the [ContaraNAS repo](https://github.com/MihaiStreames/ContaraNAS).
+The full architecture for the Rust version is documented in the [ContaraNAS repo](https://github.com/MihaiStreames/ContaraNAS/tree/rewrite/rust-core).
