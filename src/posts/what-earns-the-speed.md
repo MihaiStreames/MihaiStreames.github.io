@@ -1,5 +1,5 @@
 ---
-title: What earns the speed in tokount
+title: How tokount earns its speed
 date: "2026-04-20"
 categories:
   - engineering
@@ -9,7 +9,7 @@ tags:
   - performance
   - simd
   - command-line
-excerpt: I wrote another line-of-code counter. Here's why it's fast, what I deliberately didn't do, and the couple of decisions that matter more than the rest.
+excerpt: How a shim around tokei turned into a ground-up SIMD line counter.
 ---
 
 ## Why another one
