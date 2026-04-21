@@ -1,44 +1,19 @@
-<a id="readme-top"></a>
+# mihaistreames.github.io
 
-<!-- PROJECT SHIELDS -->
-<div align="center">
+My personal site and blog, built with [SvelteKit](https://svelte.dev/docs/kit).
 
 [![Deploy](https://github.com/MihaiStreames/MihaiStreames.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/MihaiStreames/MihaiStreames.github.io/actions/workflows/deploy.yml)
-[![License](https://img.shields.io/github/license/MihaiStreames/MihaiStreames.github.io?label=License)](LICENSE)
+[![License](https://img.shields.io/github/license/MihaiStreames/MihaiStreames.github.io)](LICENSE)
 
-</div>
+Licensed under MIT.
 
-<div align="center">
-  <h1>mihaistreames.github.io</h1>
-  <h3>Personal site and blog, built with SvelteKit.</h3>
-</div>
+## About
 
-<!-- ABOUT THE PROJECT -->
-
-## About The Project
-
-My personal website and blog. Statically generated with SvelteKit and deployed to GitHub Pages.
-
-Posts are written in Markdown and rendered with mdsvex. The theme is Catppuccin Mocha (I love this theme) with a Python-code-inspired aesthetic (I'm a backend developer, not a frontend one).
-
-### Built With
-
-- [SvelteKit](https://svelte.dev/docs/kit)
-- [TypeScript](https://www.typescriptlang.org/)
-- [mdsvex](https://mdsvex.pngwn.io/)
-- [Shiki](https://shiki.style/)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- LICENSE -->
+Used to be a Jekyll blog. I liked writing posts but wanted to keep using Svelte for anything web, so I rebuilt it on SvelteKit. I write about my current projects, random findings... That's the whole point.
 
 ## License
 
-MIT. Do whatever you want with it. See [LICENSE](LICENSE) for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
----
+MIT. See [LICENSE](LICENSE).
 
 <div align="center">
 
