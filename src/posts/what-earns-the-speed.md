@@ -10,6 +10,7 @@ tags:
   - simd
   - command-line
 excerpt: How a shim around tokei turned into a ground-up SIMD line counter.
+image: /images/posts/tokount-hero.gif
 ---
 
 ## Why another one
@@ -52,17 +53,17 @@ A few days before the release, during that same churn, I had a lucky run that la
 
 Looks great in isolation. Wasn't reproducible. The 617ms was a good-variance run; the mean was noticeably higher.
 
-April 16 was when I took the perf work seriously and shipped v2.1.8. The headline was __stability, not raw speed__. I dropped `mmap` in favor of a reused 64 KiB buffer and `read_to_end`. The mean shifted a bit but the stddev collapsed from ~49ms to ~14ms. I inlined the delimiter match in the hot FSM loop. Scalar 1/2/3-byte arms instead of `[u8]::starts_with`. That dropped tokount-owned `__memcmp` samples from 582 million to 0. I removed `memmap2`, `rayon`, and `crossbeam-channel` entirely. The Linux kernel run at v2.1.8 was __743ms__:
+April 16 was when I took the perf work seriously and shipped v2.1.8. The headline was __stability, not raw speed__. I dropped `mmap` in favor of a reused 64 KiB buffer and `read_to_end`. The mean shifted a bit but the stddev collapsed from ~49ms to ~14ms. I inlined the delimiter match in the hot FSM loop. Scalar 1/2/3-byte arms instead of `[u8]::starts_with`. That dropped tokount-owned `__memcmp` samples from 582 million to 0. I removed `memmap2`, `rayon`, and `crossbeam-channel` entirely. The Linux kernel run at v2.1.8 was __915ms__:
 
-![tokount v2.1.8 Linux kernel benchmark, 743ms](/images/posts/tokount-v218-linux-kernel.png)
+![tokount v2.1.8 Linux kernel benchmark, 915ms](/images/posts/tokount-v218-linux-kernel.png)
 
-Actually slightly slower in absolute mean than the lucky-run 617ms chart, because the earlier number was cherry-picked by variance. What mattered is that 743ms was __boringly reproducible__. You could run it ten times and see 735, 742, 748, 740, 751. That's when the tool stopped feeling like a prototype.
+Actually slightly slower in absolute mean than the lucky-run 617ms chart, because the earlier number was cherry-picked by variance. What mattered is that 915ms was __boringly reproducible__. You could run it ten times and see numbers clustered tightly together. That's when the tool stopped feeling like a prototype.
 
 Today, on v2.1.9, same laptop, tmpfs:
 
 ![tokount v2.1.9 Linux kernel benchmark, 779ms](/images/posts/tokount-latest-linux-kernel.png)
 
-Within noise of v2.1.8. On my desktop (i7-10700K, 32GB, tmpfs), v2.1.8 lands at __168ms__. That's 5.3× `tokei` and 5.3× sc`c, with a tight stddev.
+A step down from v2.1.8's 915ms, same shape of stability. On my desktop (i7-10700K, 32GB, tmpfs), v2.1.9 lands at __168ms__. That's 5.3× `tokei` and 5.3× `scc`, with a tight stddev.
 
 ## The one loop
 
