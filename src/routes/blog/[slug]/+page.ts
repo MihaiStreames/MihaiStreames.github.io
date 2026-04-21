@@ -12,7 +12,7 @@ interface MdsvexModule {
 interface PostPageMeta extends Omit<PostMeta, "slug"> {
   /** Canonical absolute URL of the post */
   url: string;
-  /** Absolute OG image URL - hero if set, otherwise site default */
+  /** Absolute OG image URL: hero if set, otherwise site default */
   image: string;
 }
 
@@ -38,11 +38,12 @@ export function load({ params }: { params: { slug: string } }): {
       error(404, `Post not found: ${params.slug}`);
     }
 
-    const url = `https://mihaistreames.github.io/blog/${params.slug}`;
-    const image =
-      post.metadata.image !== undefined && post.metadata.image !== ""
-        ? `https://mihaistreames.github.io${post.metadata.image}`
-        : "https://mihaistreames.github.io/og-image.png";
+    const host = "https://mihaistreames.github.io";
+    const url = `${host}/blog/${params.slug}`;
+    const hero = post.metadata.image ?? "";
+    // scrapers often choke on animated gif, swap to sibling .png for og
+    const ogPath = hero.endsWith(".gif") ? hero.replace(/\.gif$/, "-og.png") : hero;
+    const image = ogPath !== "" ? `${host}${ogPath}` : `${host}/og-image.png`;
 
     return {
       content: post.default,

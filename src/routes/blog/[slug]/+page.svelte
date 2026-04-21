@@ -15,8 +15,6 @@
   <meta content={data.meta.excerpt} property="og:description" />
   <meta content={data.meta.url} property="og:url" />
   <meta content={data.meta.image} property="og:image" />
-  <meta content="1200" property="og:image:width" />
-  <meta content="630" property="og:image:height" />
   <meta content="MihaiStreames" property="og:site_name" />
 
   <!-- twitter/x card -->
