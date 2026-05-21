@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+
+      body {
+        font-family: "JetBrains Mono", monospace;
+        background: #1e1e2e;
+        color: #cdd6f4;
+        position: relative;
+      }
+
+      .window {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 1000px;
+        background: #181825;
+        border: 1px solid #313244;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      .titlebar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 20px;
+        background: #11111b;
+        border-bottom: 1px solid #313244;
+      }
+
+      .titlebar .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+      }
+
+      .dot.r {
+        background: #f38ba8;
+      }
+
+      .dot.y {
+        background: #f9e2af;
+      }
+
+      .dot.g {
+        background: #a6e3a1;
+      }
+
+      .path {
+        margin-left: 12px;
+        color: #6c7086;
+        font-size: 1rem;
+      }
+
+      .code {
+        padding: 44px 56px;
+        font-size: 1.9rem;
+        line-height: 1.55;
+      }
+
+      .k {
+        color: #cba6f7;
+      }
+
+      .f {
+        color: #89b4f8;
+      }
+
+      .s {
+        color: #a6e3a1;
+      }
+
+      .c {
+        color: #6c7086;
+        font-style: italic;
+      }
+
+      .self {
+        color: #f38ba8;
+        font-style: italic;
+      }
+
+      .indent {
+        padding-left: 2.4rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="window">
+      <div class="titlebar">
+        <div class="dot r"></div>
+        <div class="dot y"></div>
+        <div class="dot g"></div>
+        <span class="path">mihaistreames.github.io</span>
+      </div>
+      <div class="code">
+        <div>
+          <span class="k">class</span>
+          <span class="f">MihaiStreames</span>
+          :
+        </div>
+        <div class="indent">
+          <div>
+            <span class="k">def</span>
+            <span class="f">__init__</span>
+            (
+            <span class="self">self</span>
+            ):
+          </div>
+          <div class="indent">
+            <div>
+              <span class="self">self</span>
+              .role =
+              <span class="s">"backend dev"</span>
+            </div>
+            <div>
+              <span class="self">self</span>
+              .stack = [
+              <span class="s">"Python"</span>
+              ,
+              <span class="s">"Rust"</span>
+              ,
+              <span class="s">"C"</span>
+              ]
+            </div>
+            <div><span class="c"># personal site & blog</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

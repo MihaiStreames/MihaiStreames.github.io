@@ -1,6 +1,6 @@
 ---
-title: Teaching an AI to Play Downwell (and Failing Spectacularly)
-date: "2026-01-10"
+title: Teaching an AI to play Downwell (and failing spectacularly)
+date: '2026-01-10'
 categories:
   - ai
   - gaming
@@ -33,8 +33,8 @@ class CustomDownwellEnvironment:
 The plan was simple:
 
 1. Screenshot the game with `pyautogui`
-2. Extract HP/gems with OCR (Tesseract)
-3. Feed into a basic DQN
+1. Extract HP/gems with OCR (Tesseract)
+1. Feed into a basic DQN
 
 Within 10 minutes, I realized OCR was absolute garbage for this:
 
@@ -109,11 +109,11 @@ PLAYER_PTR = {
 Finding these pointer chains took consisted of:
 
 1. Searching for value in Cheat Engine
-2. Taking damage/collect gem
-3. Searching for changed value
-4. Repeating until I had the address
-5. Finding what accessed this address
-6. Generating pointer map
+1. Taking damage/collect gem
+1. Searching for changed value
+1. Repeating until I had the address
+1. Finding what accessed this address
+1. Generating pointer map
 
 But it worked! The AI could now read game state with zero latency and perfect accuracy.
 
@@ -167,7 +167,7 @@ That last one is hilarious in retrospect. The ideas were flowing so well that I 
 
 In October 2024, I came back with fresh eyes and finally understood what was wrong.
 
-### The Critical Bug: Not Learning Online
+### The critical bug: not learning online
 
 My original implementation only trained at the end of episodes:
 
@@ -212,7 +212,7 @@ def step(self):
 
 This single change made the agent go from completely random to actually learning patterns.
 
-### Frame Stacking: Teaching the AI to See Motion
+### Frame stacking
 
 The agent couldn't perceive velocity from single frames. Imagine trying to play Downwell by looking at screenshots - you'd have no idea if enemies are moving up or down.
 
@@ -230,9 +230,9 @@ def get_state(self):
     return state
 ```
 
-Now the AI could "see" motion across 4 frames, understanding trajectories and velocities.
+Now the AI could "see" motion across 4 frames - direction, speed, whether something was coming at it.
 
-### The Threading Architecture
+### Threading
 
 Running everything in a single thread was killing performance. The solution: decouple perception from decision-making.
 
@@ -261,7 +261,7 @@ class AgentThreader(Thread):
 
 This let the AI read game state at 60 FPS while making decisions at a more reasonable 15 FPS.
 
-### The Reward System
+### Rewards
 
 Early reward systems were too simple. The final version rewarded:
 
@@ -326,7 +326,7 @@ Watching the Q-values change in real-time was mesmerizing. You could literally s
 
 ## The Reality Check
 
-After all this work, here's the truth: **the AI still can't beat Downwell**.
+After all this work: the AI still can't beat Downwell.
 
 It can:
 

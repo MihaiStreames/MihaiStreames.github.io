@@ -1,6 +1,6 @@
 ---
-title: How I Reversed World of Tanks Blitz's Custom DVPL Format
-date: "2025-06-06"
+title: How I reversed World of Tanks Blitz's custom DVPL format
+date: '2025-06-06'
 categories:
   - reverse-engineering
   - file-formats
@@ -48,7 +48,7 @@ level>8</
 1Rol
 ```
 
-Most of it was gibberish, but I could make out fragments of XML data (it's in the file name, duh) mixed with compressed binary data. The presence of readable strings suggested the files contained processed data.
+Most of it was gibberish, but I could make out fragments of XML data (it's in the file name, duh) mixed with compressed binary data.
 
 ## Binary Analysis: Finding the Magic
 
@@ -73,7 +73,7 @@ Something caught my eye at the end of the file:
 00000f24
 ```
 
-There it was - the ASCII string "DVPL" at the very end of the file! This looked like a magic number, which often indicates a footer or header structure in custom file formats.
+There it was - "DVPL", right at the end. Magic number. Footer structure.
 
 ## Analyzing the Footer Structure
 
@@ -159,7 +159,7 @@ Value 4: 2
 
 The fourth value being consistently 2 across all files strongly suggested a compression type. For the other values, I made guesses based on common file format patterns:
 
-**Typical compressed file formats often store:**
+Typical compressed formats store a few standard fields:
 
 - Original (uncompressed) size
 - Compressed size
@@ -222,7 +222,7 @@ Footer CRC32: 2670330284
 Match: True
 ```
 
-Perfect match! So the complete structure is:
+Perfect match. The complete structure:
 
 ```python
 # DVPL footer format: <IIII4s
@@ -233,7 +233,7 @@ If you're not familiar with `struct.unpack`, `<IIII4s` just means "four little-e
 
 ## The Complete DVPL Format
 
-So, putting it all together:
+The full format:
 
 ```text
 [Compressed Payload Data]

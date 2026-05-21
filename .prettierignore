@@ -1,4 +1,5 @@
-.svelte-kit
-build
-node_modules
+.claude/
+.svelte-kit/
+build/
+node_modules/
 bun.lock

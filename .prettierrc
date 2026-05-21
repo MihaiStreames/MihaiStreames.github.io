@@ -1,40 +1,9 @@
 {
-  "semi": true,
   "singleQuote": false,
-  "quoteProps": "as-needed",
-  "jsxSingleQuote": false,
+  "semi": true,
   "trailingComma": "all",
   "bracketSpacing": true,
-  "bracketSameLine": false,
-  "arrowParens": "always",
-  "printWidth": 100,
-  "useTabs": false,
-  "tabWidth": 2,
-  "endOfLine": "lf",
+  "arrowParens": "avoid",
   "embeddedLanguageFormatting": "auto",
-  "proseWrap": "preserve",
-  "htmlWhitespaceSensitivity": "css",
-  "singleAttributePerLine": false,
-  "plugins": ["prettier-plugin-svelte"],
-  "overrides": [
-    {
-      "files": "*.svelte",
-      "options": {
-        "parser": "svelte"
-      }
-    },
-    {
-      "files": "*.md",
-      "options": {
-        "proseWrap": "preserve",
-        "printWidth": 9999
-      }
-    },
-    {
-      "files": "*.yaml",
-      "options": {
-        "singleQuote": false
-      }
-    }
-  ]
+  "htmlWhitespaceSensitivity": "ignore"
 }

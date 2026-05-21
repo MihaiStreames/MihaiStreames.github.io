@@ -25,13 +25,12 @@ const highlighter = await createHighlighter({
   ],
 });
 
-/** @type {import('mdsvex').MdsvexOptions} */
 const mdsvexOptions = {
   extensions: [".md"],
   highlight: {
-    highlighter: (code, lang) => {
+    highlighter: (code: string, lang: string | null | undefined) => {
       const html = highlighter.codeToHtml(code, {
-        lang: lang || "text",
+        lang: lang ?? "text",
         theme: "catppuccin-mocha",
       });
       // strip shiki's wrapping <pre> so mdsvex doesn't double-wrap
@@ -40,7 +39,6 @@ const mdsvexOptions = {
   },
 };
 
-/** @type {import('@sveltejs/kit').Config} */
 const config = {
   extensions: [".svelte", ".md"],
   preprocess: [vitePreprocess(), mdsvex(mdsvexOptions)],

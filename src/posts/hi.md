@@ -1,6 +1,6 @@
 ---
 title: Hello
-date: "2025-06-03"
+date: '2025-06-03'
 categories:
   - introduction
 tags:
@@ -78,10 +78,8 @@ bundle exec jekyll serve
 
 ## Now about me
 
-I'm someone **who enjoys tinkering with technology** and **figuring out how things work**, as you can probably tell from my setup process above.
+I'm someone who enjoys tinkering with technology and figuring out how things work, as you can probably tell from my setup process above.
 
-**Most of my time** is spent either **studying or programming**, but my **main passion** is **making music**. I believe in learning by doing, which often leads to these kinds of late-night adventures where I decide to do random things such as this very blog.
+Most of my time is spent either studying or programming, but my main passion is making music. I believe in learning by doing, which is how I end up in situations like this one.
 
-I started this to document my learning journey and **share the random things I discover** along the way. Whether it's a tricky technical problem I solved, a cool piece of code I wrote, or literally anything interesting, I might write about it here.
-
-If any of my posts help you solve a problem or learn something new, that would make me really happy.
+I started this to document the random things I discover along the way. If something I write helps you - great.
