@@ -28,9 +28,9 @@ const highlighter = await createHighlighter({
 const mdsvexOptions = {
   extensions: [".md"],
   highlight: {
-    highlighter: (code: string, lang: string | null | undefined) => {
-      const html = highlighter.codeToHtml(code, {
-        lang: lang ?? "text",
+    highlighter: (code, lang) => {
+      const html = highlighter.codeToHtml(String(code), {
+        lang: String(lang ?? "text"),
         theme: "catppuccin-mocha",
       });
       // strip shiki's wrapping <pre> so mdsvex doesn't double-wrap

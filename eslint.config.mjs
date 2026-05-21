@@ -4,7 +4,7 @@ import ts from "typescript-eslint";
 import svelte from "eslint-plugin-svelte";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
-import svelteConfig from "./svelte.config.ts";
+import svelteConfig from "./svelte.config.js";
 
 export default defineConfig([
   {
@@ -24,7 +24,7 @@ export default defineConfig([
       },
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["svelte.config.ts"],
+          allowDefaultProject: ["svelte.config.js"],
         },
         tsconfigRootDir: import.meta.dirname,
         extraFileExtensions: [".svelte"],
@@ -36,7 +36,7 @@ export default defineConfig([
       "no-implied-eval": "off",
       "no-throw-literal": "off",
 
-      // typescript overrides / additions not covered by presets
+      // typescript overrides - additions not covered by presets
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
@@ -74,7 +74,7 @@ export default defineConfig([
       "object-shorthand": "error",
       "prefer-destructuring": ["error", { object: true, array: false }],
 
-      // svelte additions not covered by recommended
+      // svelte overrides - additions not covered by recommended
       "svelte/prefer-class-directive": "error",
       "svelte/prefer-style-directive": "error",
       "svelte/shorthand-attribute": "error",

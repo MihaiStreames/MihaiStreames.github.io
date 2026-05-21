@@ -15,7 +15,7 @@ chrome() {
     "$@"
 }
 
-echo "rendering favicon..."
+echo "Rendering favicon..."
 tmp=$(mktemp --suffix=.png)
 trap 'rm -f "$tmp"' EXIT
 
@@ -30,19 +30,10 @@ magick "$tmp" \
   -extent 256x256 \
   "$STATIC/favicon.png"
 
-echo "rendering og-image..."
+echo "Rendering og-image..."
 chrome \
   --window-size=1200,630 \
   --screenshot="$STATIC/og-image.png" \
   "file://$SCRIPTS/og-image.html" >/dev/null
 
-echo "generating post hero og fallbacks..."
-shopt -s nullglob
-for gif in "$STATIC"/images/posts/*.gif; do
-  out="${gif%.gif}-og.png"
-  # last frame after coalesce - gifs use delta frames, need full paint
-  magick "$gif" -coalesce -delete '0--2' "$out"
-  echo "  $(basename "$out")"
-done
-
-echo "done."
+echo "Done"
