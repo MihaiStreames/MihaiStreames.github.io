@@ -1,62 +1,55 @@
 {
   "handle": "MihaiStreames",
-  "role": "CS Student @ ULB (graduating Sept 2026)",
+  "role": "cs student (graduating sept 2026)",
   "focus": "backend development",
-  "languages": ["Python", "Rust", "C/C++", "Java", "Lua"],
-  "also": "music producer since 2020 (EDM / Ableton + Serum)",
+  "languages": ["py", "rs", "c", "cpp", "sh", "ts"],
+  "also": "music producer since 2020 (edm / ableton)",
   "projects": [
-    {
-      "name": "Velox",
-      "url": "https://github.com/velox-sh",
-      "org": "velox-sh",
-      "description": "fast and nice tools for developers with Python and Rust",
-      "children": [
-        {
-          "name": "tokount",
-          "url": "https://github.com/velox-sh/tokount",
-          "description": "the fastest line counter, written in Rust"
-        },
-        {
-          "name": "ghlang",
-          "url": "https://github.com/velox-sh/ghlang",
-          "description": "pretty language charts generator for GitHub and local repos"
-        },
-        {
-          "name": "tidy",
-          "url": "https://github.com/velox-sh/tidy",
-          "description": "import fixing tool for Python - WIP"
-        }
-      ]
-    },
     {
       "name": "DAWPresence",
       "url": "https://github.com/MihaiStreames/DAWPresence",
-      "description": "discord presence for your DAW, made with Rust, 3MB binary"
+      "description": "discord rich presence for your DAWs (rust btw)"
     },
     {
-      "name": "thin32",
-      "url": "https://github.com/Thin32",
-      "description": "smallest and fastest Windows replacement apps (alt-tab, shell, taskbar)",
+      "name": "Downwell.AI",
+      "url": "https://github.com/MihaiStreames/Downwell.AI",
+      "description": "dqn agent for Downwell (WIP)"
+    },
+    {
+      "name": "psnpp-gist",
+      "url": "https://github.com/MihaiStreames/psnpp-gist",
+      "description": "companion userscript for psnp+ (adds gist sync support)"
+    },
+    {
+      "name": "PoneyHot",
+      "url": "https://github.com/MihaiStreames/PoneyHot",
+      "description": "cool little observability stack project for uni",
       "collaborators": [
         {
-          "name": "big-lip-bob",
-          "url": "https://github.com/big-lip-bob"
+          "name": "BelmuTM",
+          "url": "https://github.com/BelmuTM"
         }
       ]
-    },
-    {
-      "name": "ContaraNAS",
-      "url": "https://github.com/MihaiStreames/ContaraNAS",
-      "description": "NAS management app in Python + Tauri, server-driven UI - postponed"
     },
     {
       "name": "fmod-jna",
       "url": "https://github.com/MihaiStreames/fmod-jna",
-      "description": "JNA wrapper around FMOD for Java",
+      "description": "jna wrapper around fmod for java",
       "collaborators": [
         {
           "name": "big-lip-bob",
           "url": "https://github.com/big-lip-bob"
+        }
+      ]
+    },
+    {
+      "name": "guard-core-rs",
+      "url": "https://github.com/rennf93/guard-core-rs",
+      "description": "porting guard-core to rust",
+      "collaborators": [
+        {
+          "name": "rennf93",
+          "url": "https://github.com/rennf93"
         }
       ]
     }
@@ -65,12 +58,22 @@
     {
       "label": "github",
       "url": "https://github.com/MihaiStreames",
-      "display": "github.com/MihaiStreames"
+      "display": "github.com/mihaistreames"
     },
     {
-      "label": "music",
+      "label": "soundcloud",
       "url": "https://soundcloud.com/officialoptik",
       "display": "soundcloud.com/officialoptik"
+    },
+    {
+      "label": "youtube",
+      "url": "https://www.youtube.com/@HappyGuySmiley",
+      "display": "youtube.com/happyguysmiley"
+    },
+    {
+      "label": "ko-fi",
+      "url": "https://ko-fi.com/mihaistreames",
+      "display": "ko-fi.com/mihaistreames"
     }
   ]
 }

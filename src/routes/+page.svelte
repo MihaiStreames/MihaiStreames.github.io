@@ -68,40 +68,18 @@
   <p class="section-header"><span class="py-comment"># projects</span></p>
   {#each me.projects as project (project.name)}
     <div class="project">
-      {#if project.org}
-        <p>
-          <span class="py-decorator">@org</span>(<span class="py-string">"{project.org}"</span>)
-        </p>
-      {/if}
       <p>
-        {#if project.org}
-          <span class="py-keyword">class</span>
-        {/if}
         {#if project.url}
           <a href={project.url}><span class="py-func">{project.name}</span></a>
         {:else}
           <span class="py-func">{project.name}</span>
-        {/if}{#if project.org}:{/if}
+        {/if}
         <span class="py-comment"
           ># {project.description}{#if project.collaborators}{" "}
             {#each project.collaborators as collab (collab.name)}
               with <a href={collab.url}>@{collab.name}</a>{/each}{/if}</span
         >
       </p>
-      {#if project.children}
-        <div class="indent">
-          {#each project.children as child (child.name)}
-            <p>
-              {#if child.url}
-                <a href={child.url}><span class="py-param">{child.name}</span></a>
-              {:else}
-                <span class="py-param">{child.name}</span>
-              {/if}:
-              <span class="py-comment">{child.description}</span>
-            </p>
-          {/each}
-        </div>
-      {/if}
     </div>
   {/each}
 </section>
