@@ -13,17 +13,9 @@ tags:
 excerpt: How I discovered and decoded the DVPL file format used by World of Tanks Blitz, from initial string discovery to building a complete converter tool.
 ---
 
-## The Discovery
+I was trying to learn SQL for a Database course at uni and figured the most painless way was to build something I actually cared about, so I went with a tank database for [World of Tanks Blitz](https://wargaming.net/en/games/wotb). After a few hours of manually copying data and burning out, I realized I needed to scrape from somewhere. The [Wiki](https://wot-blitz.fandom.com) only has partial data, the [Main Wiki](https://wiki.wargaming.net/en/WoT_Blitz) is worse, I tried reversing some [protobuf](https://protobuf.dev/overview/) files looking for a clean dump, nothing useful. Eventually I started poking at the actual game install directory and ran into a pile of `.dvpl` files. Not a format I recognized.
 
-I was trying to learn SQL for a Database course exam for Uni and I decided to do that by making a tank database, since I play a lot of [World of Tanks Blitz](https://wargaming.net/en/games/wotb) as a way to chill out.
-
-I spent a few hours MANUALLY adding data, and I quickly ran out of it, since the [Wiki](https://wot-blitz.fandom.com) only has partial data. I looked on other sites, reversed [protobuf](https://protobuf.dev/overview/) files, looked on the [Main Wiki](https://wiki.wargaming.net/en/WoT_Blitz)... Nothing helpful. I decided to check the game files, where I stumbled across `.dvpl` files. These weren't standard formats I recognized, so naturally, I had to figure out what they were.
-
-My first instinct was to dump strings from the files to see if there were any readable clues:
-
-```bash
-strings list.xml.dvpl | head -20
-```
+First instinct was just `strings list.xml.dvpl | head -20`:
 
 ```text
 <root>
@@ -48,17 +40,7 @@ level>8</
 1Rol
 ```
 
-Most of it was gibberish, but I could make out fragments of XML data (it's in the file name, duh) mixed with compressed binary data.
-
-## Binary Analysis: Finding the Magic
-
-Next step, hex dump:
-
-```bash
-hexdump -C list.xml.dvpl | tail -10
-```
-
-Something caught my eye at the end of the file:
+Mostly noise but I could see fragments of XML in there, which made sense given the filename `list.xml.dvpl`. The garbled bytes between XML fragments smelled like compressed binary, so the file was probably wrapping compressed XML in some custom container. Time for `hexdump -C list.xml.dvpl | tail -10`:
 
 ```text
 00000ea0  11 36 af 0e 07 a8 7b 1f  35 f5 2f 14 06 3a 00 0f  |.6....{.5./..:..|
@@ -73,14 +55,9 @@ Something caught my eye at the end of the file:
 00000f24
 ```
 
-There it was - "DVPL", right at the end. Magic number. Footer structure.
-
-## Analyzing the Footer Structure
-
-With the magic number found, I needed to understand what came before it.
+`DVPL` at the very end. Magic number as a footer instead of a header, which is unusual but not unheard of. `</root>\n` shows up right before the metadata block, so the layout is clearly `[compressed XML][footer][DVPL]`. `tail -c 32` to see just the footer:
 
 ```bash
-# Get the last 32 bytes to see the footer structure
 tail -c 32 list.xml.dvpl | hexdump -C
 ```
 
@@ -90,114 +67,47 @@ tail -c 32 list.xml.dvpl | hexdump -C
 00000020
 ```
 
-The DVPL magic is exactly 4 bytes, and there are 16 bytes before it. This suggests a 20-byte footer structure. Looking at the pattern, it appears to be several 4-byte (32-bit) integers followed by the magic number.
-
-## Reverse Engineering the Structure
-
-To understand what these integers represent, I compared several DVPL files:
-
-```bash
-tail -c 32 customization.xml.dvpl | hexdump -C
-```
+16 bytes of metadata then the 4-byte magic. Those 16 bytes line up cleanly as four 32-bit values, especially since the last 4 bytes before `DVPL` are `02 00 00 00`. I checked a couple other `.dvpl` files to see if that `02 00 00 00` was consistent:
 
 ```text
-00000000  0e 15 00 80 3c 2f 72 6f  6f 74 3e 0a 23 16 00 00  |....</root>.#...|
+# customization.xml.dvpl
 00000010  54 03 00 00 6e 18 a0 f9  02 00 00 00 44 56 50 4c  |T...n.......DVPL|
-00000020
-```
 
-```bash
-tail -c 32 Ch01_Type59.xml.dvpl | hexdump -C
-```
-
-```text
-00000000  03 8d 00 80 3c 2f 72 6f  6f 74 3e 0a 2f 2a 00 00  |....</root>./*..|
-00000010  0f 0f 00 00 e8 c7 c4 31  02 00 00 00 44 56 50 4c  |.......1....DVPL|
-00000020
-```
-
-```bash
-tail -c 32 guns.xml.dvpl | hexdump -C
-```
-
-```text
-00000000  72 b0 00 80 3c 2f 72 6f  6f 74 3e 0a ae e4 01 00  |r...</root>.....|
+# guns.xml.dvpl
 00000010  90 27 00 00 a2 3d d5 7b  02 00 00 00 44 56 50 4c  |.'...=.{....DVPL|
-00000020
+
+# Ch01_Type59.xml.dvpl
+00000010  0f 0f 00 00 e8 c7 c4 31  02 00 00 00 44 56 50 4c  |.......1....DVPL|
 ```
 
-Looking at these hex dumps, I noticed a consistent pattern:
-
-- 16 bytes of what looks like structured data
-- 4 bytes that spell "DVPL"
-- The 4 bytes immediately before "DVPL" are always `02 00 00 00` across all files
-
-This suggested the footer contains four 32-bit little-endian integers followed by the magic number. The consistent `02 00 00 00` (which is 2 in little-endian) looked like it could be a compression type field.
-
-## Decoding the Structure
-
-Based on this pattern, I hypothesized the footer structure as four integers. Now I needed to figure out what each one represented:
+Every file ends with `02 00 00 00 DVPL`, so that field is almost certainly a compression type flag (or at least a constant the format always sets to `2` for whatever reason). The other three values vary per file, which is what you'd expect from sizes and checksums. Time to parse:
 
 ```python
 import struct
 
 footer_bytes = bytes.fromhex("84860000100f0000ac012a9f02000000")
 val1, val2, val3, val4 = struct.unpack('<IIII', footer_bytes)
-
-print(f"Value 1: {val1}")
-print(f"Value 2: {val2}")
-print(f"Value 3: {val3}")
-print(f"Value 4: {val4}")
+# Value 1: 34436
+# Value 2: 3856
+# Value 3: 2670330284
+# Value 4: 2
 ```
 
-```text
-Value 1: 34436
-Value 2: 3856
-Value 3: 2670330284
-Value 4: 2
-```
+Most compressed containers store the same four things, original size, compressed size, a checksum, and a method flag. `ls -l list.xml.dvpl` gives 3876 bytes total, minus the 20-byte footer that's 3856, which is exactly `val2`. So `val2` is compressed size, `val1` is almost certainly original size, and `val3` is too big and too random-looking to be anything but a CRC32.
 
-The fourth value being consistently 2 across all files strongly suggested a compression type. For the other values, I made guesses based on common file format patterns:
-
-Typical compressed formats store a few standard fields:
-
-- Original (uncompressed) size
-- Compressed size
-- Checksum for integrity
-- Compression method/flags
-
-Let me test this hypothesis by checking if the file sizes make sense:
-
-```bash
-ls -l list.xml.dvpl
-```
-
-```text
--rwxr-xr-x 1 user user 3876 Jun  4 17:25 list.xml.dvpl*
-```
-
-The second value (3856) exactly matches the payload size (minus the 20-byte footer), confirming it's the compressed size.
-
-To verify the first value is the original size, I needed to decompress the data. The compression type of 2 suggested it might be LZ4 (a common game compression format):
+About `val4`: LZ4 is common in game files and the value was `2`, so I tried LZ4. It worked. I then guessed that `1` was regular LZ4 and `2` was LZ4 High Compression (LZ4HC) because that maps to the order LZ4 exposes those modes, but I never actually verified this against a `.dvpl` file with a `1` flag. Could be the other way around, could be something else entirely. `lz4.block.decompress` handles both transparently so I never had to find out.
 
 ```python
 import lz4.block
 
 with open('list.xml.dvpl', 'rb') as f:
-    payload = f.read(3856)  # Read just the compressed data
+    payload = f.read(3856)
 
-try:
-    decompressed = lz4.block.decompress(payload, uncompressed_size=34436)
-    print(f"Decompressed size: {len(decompressed)}")
-    print(decompressed[:100].decode('utf-8'))
-except Exception as e:
-    print(f"LZ4 failed: {e}")
+decompressed = lz4.block.decompress(payload, uncompressed_size=34436)
+print(decompressed[:100].decode('utf-8'))
 ```
 
-This worked perfectly! The decompressed data was exactly 34436 bytes and started with proper XML:
-
 ```text
-Decompressed size: 34436
 <root>
  <Ch01_Type59>
   <id>0</id>
@@ -205,35 +115,16 @@ Decompressed size: 34436
   <descrip
 ```
 
-For the third value (2670330284), I suspected it was a CRC32 checksum of the compressed data:
+Decompressed size came out to exactly 34436 which confirmed `val1` as original size. Last piece was the CRC check:
 
 ```python
 import zlib
-
-calculated_crc = zlib.crc32(payload) & 0xffffffff  # Ensure unsigned 32-bit
-print(f"Calculated CRC32: {calculated_crc}")
-print(f"Footer CRC32: {val3}")
-print(f"Match: {calculated_crc == val3}")
+calculated_crc = zlib.crc32(payload) & 0xffffffff
+# Calculated: 2670330284
+# Footer:     2670330284
 ```
 
-```text
-Calculated CRC32: 2670330284
-Footer CRC32: 2670330284
-Match: True
-```
-
-Perfect match. The complete structure:
-
-```python
-# DVPL footer format: <IIII4s
-original_size, compressed_size, crc32_checksum, compression_type, magic = struct.unpack('<IIII4s', footer_data)
-```
-
-If you're not familiar with `struct.unpack`, `<IIII4s` just means "four little-endian uint32s followed by a 4-byte string." [Python docs](https://docs.python.org/3/library/struct.html#format-characters) explain the format characters.
-
-## The Complete DVPL Format
-
-The full format:
+Bingo. Full footer format:
 
 ```text
 [Compressed Payload Data]
@@ -243,11 +134,9 @@ The full format:
   - CRC32 Checksum   (4 bytes, little-endian uint32)
   - Compression Type (4 bytes, little-endian uint32)
     - 0: No compression
-    - 1: LZ4 compression
-    - 2: LZ4 High Compression
+    - 1: LZ4 (probably regular)
+    - 2: LZ4 (probably HC, this is the only value I've actually seen in the wild)
   - Magic Number (4 bytes, ASCII "DVPL")
 ```
 
-## The Code
-
-You can find the DVPL converter on GitHub: [MihaiStreames/dvpl-converter](https://github.com/MihaiStreames/dvpl-converter).
+`<IIII4s` in Python's struct syntax. Four little-endian uint32s then a 4-byte string. Converter is at [MihaiStreames/dvpl-converter](https://github.com/MihaiStreames/dvpl-converter).
