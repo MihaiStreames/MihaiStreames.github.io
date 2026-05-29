@@ -29,8 +29,11 @@ const mdsvexOptions = {
   extensions: [".md"],
   highlight: {
     highlighter: (code, lang) => {
+      const resolvedLang = highlighter.getLoadedLanguages().includes(String(lang))
+        ? String(lang)
+        : "text";
       const html = highlighter.codeToHtml(String(code), {
-        lang: String(lang ?? "text"),
+        lang: resolvedLang,
         theme: "catppuccin-mocha",
       });
       // strip shiki's wrapping <pre> so mdsvex doesn't double-wrap
