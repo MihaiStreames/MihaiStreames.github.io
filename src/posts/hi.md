@@ -9,7 +9,7 @@ tags:
   - setup
   - github-pages
   - arch-linux
-excerpt: My late-night adventure setting up this Jekyll blog and the inevitable troubleshooting that followed.
+excerpt: Fighting Ruby, erb, and PATH at 2am to set up a blog.
 ---
 
 I decided to make this blog at some absurd hour of the night, mostly cause I had nothing better to do. Took me a bit to figure out how [GitHub Pages](https://pages.github.com/) and [Jekyll](https://jekyllrb.com/) actually fit together, but the gist is Jekyll generates static HTML and GitHub Pages hosts it for free.

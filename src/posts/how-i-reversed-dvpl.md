@@ -10,7 +10,7 @@ tags:
   - compression
   - lz4
   - hexdump
-excerpt: How I discovered and decoded the DVPL file format used by World of Tanks Blitz, from initial string discovery to building a complete converter tool.
+excerpt: I needed tank data for a SQL assignment. Game files had it, locked behind an unknown format. This is how I got it out.
 ---
 
 I was trying to learn SQL for a Database course at uni and figured the most painless way was to build something I actually cared about, so I went with a tank database for [World of Tanks Blitz](https://wargaming.net/en/games/wotb). After a few hours of manually copying data and burning out, I realized I needed to scrape from somewhere. The [Wiki](https://wot-blitz.fandom.com) only has partial data, the [Main Wiki](https://wiki.wargaming.net/en/WoT_Blitz) is worse, I tried reversing some [protobuf](https://protobuf.dev/overview/) files looking for a clean dump, nothing useful. Eventually I started poking at the actual game install directory and ran into a pile of `.dvpl` files. Not a format I recognized.
@@ -139,4 +139,4 @@ Bingo. Full footer format:
   - Magic Number (4 bytes, ASCII "DVPL")
 ```
 
-`<IIII4s` in Python's struct syntax. Four little-endian uint32s then a 4-byte string. Converter is at [MihaiStreames/dvpl-converter](https://github.com/MihaiStreames/dvpl-converter).
+`<IIII4s` in Python's struct syntax. Four little-endian uint32s then a 4-byte string.
