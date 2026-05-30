@@ -340,44 +340,6 @@ Total on disk: 3072 bytes
 
 `/nodefaultlib` drops the CRT entirely, `/entry:main` skips the startup wrapper, `/GS-` removes the [stack cookie check](https://en.wikipedia.org/wiki/Buffer_overflow_protection). Result: **1,536 bytes**.
 
-### Cross-compiling from Linux
-
-I wanted to build both targets from Linux. The Windows Makefile uses `clang-cl` + `lld-link` with [xwin](https://github.com/Jake-Shadle/xwin) for the SDK headers and libs:
-
-```makefile
-CC := clang-cl
-LD := lld-link
-
-CFLAGS := \
-  --target=x86_64-pc-windows-msvc \
-  -imsvc $(XWIN)/crt/include \
-  -imsvc $(XWIN)/sdk/include/ucrt \
-  -imsvc $(XWIN)/sdk/include/um \
-  -imsvc $(XWIN)/sdk/include/shared
-```
-
-`xwin` downloads the SDK and CRT from Microsoft's servers and unpacks them into a layout `clang-cl` can consume. The Makefile also has `ARCH=x86` for cross-compiling to 32-bit, though that path is _still a work in progress_ since x86 stub patterns differ (`int 2e` vs `sysenter`).
-
-There's also a `WINE=1` flag that swaps the PEB walk for `GetModuleHandleA` + `GetProcAddress`. Wine's `ntdll` doesn't have the same stub layout as the real thing, so the gadget scan would fail; this fallback lets you at least run the binary under Wine to test the `NtWriteFile` call itself:
-
-```c
-BOOL resolve_ntwritefile(DWORD *ssn_out, PVOID *gadget_out)
-{
-  HMODULE ntdll = GetModuleHandleA("ntdll.dll");
-  if (!ntdll) return FALSE;
-
-  PVOID fn = (PVOID)GetProcAddress(ntdll, "NtWriteFile");
-  if (!fn) return FALSE;
-
-  *ssn_out    = 0;
-  *gadget_out = fn;
-
-  return TRUE;
-}
-```
-
-In this path `gadget_addr` holds the real `NtWriteFile` pointer, so `NtWriteFileStub` just jumps straight into it.
-
 ______________________________________________________________________
 
 Code is at [MihaiStreames/hello-world-overkill](https://github.com/MihaiStreames/hello-world-overkill). References: [f00crew](https://f00crew.org/0x33), [klezvirus](https://klezvirus.github.io/posts/Callback-Hell/), [trickster0](https://trickster0.github.io/posts/Primitive-Injection/).
