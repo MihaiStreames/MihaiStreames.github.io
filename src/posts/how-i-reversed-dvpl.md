@@ -1,15 +1,14 @@
 ---
 title: How I reversed World of Tanks Blitz's custom DVPL format
-date: '2025-06-06'
+date: "2025-06-06"
 categories:
   - reverse-engineering
-  - file-formats
 tags:
-  - world-of-tanks-blitz
-  - binary-analysis
+  - file-formats
   - compression
   - lz4
-  - hexdump
+  - python
+  - wotb
 excerpt: I needed tank data for a SQL assignment. Game files had it, locked behind an unknown format. This is how I got it out.
 ---
 
@@ -17,7 +16,7 @@ I was trying to learn SQL for a Database course at uni and figured the most pain
 
 First instinct was just `strings list.xml.dvpl | head -20`:
 
-```text
+```cmd
 <root>
  <Ch01_Type59>
   <id>0</id
@@ -42,7 +41,7 @@ level>8</
 
 Mostly noise but I could see fragments of XML in there, which made sense given the filename `list.xml.dvpl`. The garbled bytes between XML fragments smelled like compressed binary, so the file was probably wrapping compressed XML in some custom container. Time for `hexdump -C list.xml.dvpl | tail -10`:
 
-```text
+```cmd
 00000ea0  11 36 af 0e 07 a8 7b 1f  35 f5 2f 14 06 3a 00 0f  |.6....{.5./..:..|
 00000eb0  07 08 21 05 3d 00 0f 03  08 28 06 44 00 0f 5f 13  |..!.=....(.D.._.|
 00000ec0  fe 0f 70 05 9c 09 86 02  00 96 02 00 80 05 35 54  |..p...........5T|
@@ -61,7 +60,7 @@ Mostly noise but I could see fragments of XML in there, which made sense given t
 tail -c 32 list.xml.dvpl | hexdump -C
 ```
 
-```text
+```cmd
 00000000  06 9e 02 80 3c 2f 72 6f  6f 74 3e 0a 84 86 00 00  |....</root>.....|
 00000010  10 0f 00 00 ac 01 2a 9f  02 00 00 00 44 56 50 4c  |......*.....DVPL|
 00000020
@@ -69,7 +68,7 @@ tail -c 32 list.xml.dvpl | hexdump -C
 
 16 bytes of metadata then the 4-byte magic. Those 16 bytes line up cleanly as four 32-bit values, especially since the last 4 bytes before `DVPL` are `02 00 00 00`. I checked a couple other `.dvpl` files to see if that `02 00 00 00` was consistent:
 
-```text
+```cmd
 # customization.xml.dvpl
 00000010  54 03 00 00 6e 18 a0 f9  02 00 00 00 44 56 50 4c  |T...n.......DVPL|
 
@@ -93,7 +92,7 @@ val1, val2, val3, val4 = struct.unpack('<IIII', footer_bytes)
 # Value 4: 2
 ```
 
-Most compressed containers store the same four things, original size, compressed size, a checksum, and a method flag. `ls -l list.xml.dvpl` gives 3876 bytes total, minus the 20-byte footer that's 3856, which is exactly `val2`. So `val2` is compressed size, `val1` is almost certainly original size, and `val3` is too big and too random-looking to be anything but a CRC32.
+Most compressed containers store the same four things, original size, compressed size, a checksum, and a method flag. `ls -l list.xml.dvpl` gives 3,876 bytes total, minus the 20-byte footer that's 3,856, which is exactly `val2`. So `val2` is compressed size, `val1` is almost certainly original size, and `val3` is too big and too random-looking to be anything but a CRC32.
 
 About `val4`: LZ4 is common in game files and the value was `2`, so I tried LZ4. It worked. I then guessed that `1` was regular LZ4 and `2` was LZ4 High Compression (LZ4HC) because that maps to the order LZ4 exposes those modes, but I never actually verified this against a `.dvpl` file with a `1` flag. Could be the other way around, could be something else entirely. `lz4.block.decompress` handles both transparently so I never had to find out.
 
@@ -107,7 +106,7 @@ decompressed = lz4.block.decompress(payload, uncompressed_size=34436)
 print(decompressed[:100].decode('utf-8'))
 ```
 
-```text
+```cmd
 <root>
  <Ch01_Type59>
   <id>0</id>
@@ -115,7 +114,7 @@ print(decompressed[:100].decode('utf-8'))
   <descrip
 ```
 
-Decompressed size came out to exactly 34436 which confirmed `val1` as original size. Last piece was the CRC check:
+Decompressed size came out to exactly 34,436 which confirmed `val1` as original size. Last piece was the CRC check:
 
 ```python
 import zlib
@@ -126,7 +125,7 @@ calculated_crc = zlib.crc32(payload) & 0xffffffff
 
 Bingo. Full footer format:
 
-```text
+```cmd
 [Compressed Payload Data]
 [Footer - 20 bytes:]
   - Original Size    (4 bytes, little-endian uint32)

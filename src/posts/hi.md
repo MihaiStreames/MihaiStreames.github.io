@@ -1,13 +1,9 @@
 ---
 title: Hello
-date: '2025-06-03'
+date: "2025-06-03"
 categories:
-  - introduction
+  - meta
 tags:
-  - welcome
-  - jekyll
-  - setup
-  - github-pages
   - arch-linux
 excerpt: Fighting Ruby, erb, and PATH at 2am to set up a blog.
 ---
