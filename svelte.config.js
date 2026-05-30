@@ -10,6 +10,7 @@ const highlighter = await createHighlighter({
     "bash",
     "c",
     "cmd",
+    "console",
     "cpp",
     "html",
     "ini",

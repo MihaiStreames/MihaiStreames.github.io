@@ -51,7 +51,7 @@ int main(void)
 
 That's the whole program. Once it worked I got curious how small I could get the binary. A `clang -Os -nostdlib` build with no special flags produces this:
 
-```cmd
+```console
 section                size    addr
 .note.gnu.build-id       36     904
 .interp                  28     940
@@ -85,7 +85,7 @@ Total                  1830
 
 Using that map, I made a custom linker script that throws all of that away and collapses everything into a single `PT_LOAD` segment with the load address packed directly after the ELF headers:
 
-```c
+```ini
 ENTRY(main)
 
 PHDRS
@@ -103,7 +103,7 @@ SECTIONS
 
 `FLAGS(5)` is `PF_R | PF_X`. With `-ffunction-sections -fdata-sections` on the compiler and `--strip-all --build-id=none --gc-sections` on the linker, the result is:
 
-```cmd
+```console
 section   size      addr
 .text       83   4194424
 Total       83
@@ -226,7 +226,7 @@ static int str_eq(const char *a, const char *b)
 
 An unhooked x64 `Nt*` stub looks like this:
 
-```cmd
+```console
 4C 8B D1        mov r10, rcx    ; kernel syscall ABI: arg0 goes in r10
 B8 08 00 00 00  mov eax, 0x08   ; SSN (varies per build)
 0F 05           syscall
@@ -318,7 +318,7 @@ int          main(void)
 
 Same exercise as with the ELF, but the PE header has a hard minimum size so you can't get as aggressive. Without any size optimisations the linker produces four sections:
 
-```cmd
+```console
 Name     VirtualSize   RawDataSize
 .text    0x23C (572)          1024
 .rdata   0xB4  (180)           512
@@ -329,7 +329,7 @@ Total on disk: 3072 bytes
 
 `.rdata` is read-only data (string literals, import thunks). `.pdata` is the structured exception handling table the compiler emits for every function on x64, for the Windows stack unwinder. Each section is padded to `FileAlignment` (512 bytes by default) so four sections with tiny actual content still occupy at minimum 4 × 512 = 2,048 bytes on disk, plus whatever the content rounds up to. Merging all of them into `.text` eliminates the extra section table entries and collapses four alignment boundaries into one:
 
-```cmd
+```console
 /nodefaultlib
 /entry:main
 /GS-
