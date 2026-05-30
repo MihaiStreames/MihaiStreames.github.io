@@ -119,7 +119,7 @@ The starting point was leetCipher's approach: walk the PEB to find `ntdll`, pars
 
 ### Walking the PEB
 
-`GS:[0x60]` on x64 (or `FS:[0x30]` on x86) holds the PEB address, so that's one less API call needed. `Ldr->InMemoryOrderModuleList` is a doubly-linked list of every loaded module. `ntdll` is always in there (alongside `kernel32.dll`); it's the first DLL the loader maps before anything else runs.
+`GS:[0x60]` on x64 (or `FS:[0x30]` on x86) holds the PEB address, so that's one less API call needed. `Ldr->InMemoryOrderModuleList` is a doubly-linked list of every loaded module. `ntdll.dll` is always in there (alongside `kernel32.dll`); it's the first DLL the loader maps before anything else runs.
 
 The original code used `wcsrchr` to strip the path prefix off `FullDllName` and then `wcscmp`. I switched to matching on `BaseDllName` directly (it's already just the filename, no path) and wrote a simple case-insensitive compare to avoid pulling in any string functions:
 
@@ -199,7 +199,7 @@ typedef struct
 
 ### Parsing the export directory
 
-With the base address, we need to parse the PE export table. The export directory has three parallel arrays: `AddressOfNames` (function name strings), `AddressOfNameOrdinals` (index into the RVA array), and `AddressOfFunctions` (RVAs). Walk `AddressOfNames`, find `"NtWriteFile"`, use the matching ordinal to index `AddressOfFunctions`, add the base. That's the stub.
+Now we have the base address. Next problem: finding `NtWriteFile` inside it. We need to parse the PE export table. The export directory has three parallel arrays: `AddressOfNames` (function name strings), `AddressOfNameOrdinals` (index into the RVA array), and `AddressOfFunctions` (RVAs). Walk `AddressOfNames`, find `"NtWriteFile"`, use the matching ordinal to index `AddressOfFunctions`, add the base. That's the stub.
 
 ```c
 for (DWORD i = 0; i < exp->NumberOfNames; i++)
@@ -233,7 +233,7 @@ B8 08 00 00 00  mov eax, 0x08   ; SSN (varies per build)
 C3              ret
 ```
 
-The first four bytes are always `4C 8B D1 B8` on an unhooked stub. If they're not, something has patched it (most likely an EDR's inline hook), so we bail:
+The first four bytes are always `4C 8B D1 B8` on an unhooked stub. If they're not, something has patched it. A hooked stub typically starts with `E9` (a near JMP) or `FF 25` (an indirect JMP through a pointer), redirecting execution to the EDR's trampoline before handing control back to the real stub. We can detect it but we can't read the SSN through the hook, so we bail:
 
 ```c
 if (stub[0] != 0x4C || stub[1] != 0x8B || stub[2] != 0xD1 || stub[3] != 0xB8) return FALSE;
@@ -244,7 +244,7 @@ Bytes 4–7 are the SSN. Little-endian, cast directly.
 
 ### Finding a gadget
 
-Instead of putting a `syscall` instruction in the binary, we scan `ntdll` for a `syscall; ret` sequence (`0F 05 C3`) and jump into it. This is the indirect syscall technique described in [f00crew's post](https://f00crew.org/0x33) and analysed more thoroughly by [klezvirus](https://klezvirus.github.io/posts/Callback-Hell/).
+Now we have both the SSN and the stub address. We can't just emit a `syscall` instruction in our own binary and be done with it; that's where the EDR problem starts. Instead, we scan `ntdll` for a `syscall; ret` sequence (`0F 05 C3`) and jump into it. This is the indirect syscall technique described in [f00crew's post](https://f00crew.org/0x33) and analysed more thoroughly by [klezvirus](https://klezvirus.github.io/posts/Callback-Hell/).
 
 The reason it matters: when the kernel enters on a `syscall`, it can check the return address sitting on the stack. If that address is inside your binary rather than inside `ntdll`, it stands out. An EDR watching `NtWriteFile` calls will notice that no real userspace code has a `syscall` instruction at that address. Jumping into a gadget inside `ntdll` makes the return address look like a normal stub invocation.
 
@@ -327,7 +327,7 @@ Name     VirtualSize   RawDataSize
 Total on disk: 3072 bytes
 ```
 
-`.rdata` is read-only data (string literals, import thunks). `.pdata` is the structured exception handling table the compiler emits for every function on x64, for the Windows stack unwinder. Merging all of them into `.text` eliminates the section table entries and their per-section alignment padding:
+`.rdata` is read-only data (string literals, import thunks). `.pdata` is the structured exception handling table the compiler emits for every function on x64, for the Windows stack unwinder. Each section is padded to `FileAlignment` (512 bytes by default) so four sections with tiny actual content still occupy at minimum 4 × 512 = 2,048 bytes on disk, plus whatever the content rounds up to. Merging all of them into `.text` eliminates the extra section table entries and collapses four alignment boundaries into one:
 
 ```cmd
 /nodefaultlib
