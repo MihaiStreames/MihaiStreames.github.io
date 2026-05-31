@@ -16,7 +16,7 @@ I was trying to learn SQL for a Database course at uni and figured the most pain
 
 First instinct was just `strings list.xml.dvpl | head -20`:
 
-```cmd
+```console
 <root>
  <Ch01_Type59>
   <id>0</id
@@ -41,7 +41,7 @@ level>8</
 
 Mostly noise but I could see fragments of XML in there, which made sense given the filename `list.xml.dvpl`. The garbled bytes between XML fragments smelled like compressed binary, so the file was probably wrapping compressed XML in some custom container. Time for `hexdump -C list.xml.dvpl | tail -10`:
 
-```cmd
+```console
 00000ea0  11 36 af 0e 07 a8 7b 1f  35 f5 2f 14 06 3a 00 0f  |.6....{.5./..:..|
 00000eb0  07 08 21 05 3d 00 0f 03  08 28 06 44 00 0f 5f 13  |..!.=....(.D.._.|
 00000ec0  fe 0f 70 05 9c 09 86 02  00 96 02 00 80 05 35 54  |..p...........5T|
@@ -60,7 +60,7 @@ Mostly noise but I could see fragments of XML in there, which made sense given t
 tail -c 32 list.xml.dvpl | hexdump -C
 ```
 
-```cmd
+```console
 00000000  06 9e 02 80 3c 2f 72 6f  6f 74 3e 0a 84 86 00 00  |....</root>.....|
 00000010  10 0f 00 00 ac 01 2a 9f  02 00 00 00 44 56 50 4c  |......*.....DVPL|
 00000020
@@ -68,7 +68,7 @@ tail -c 32 list.xml.dvpl | hexdump -C
 
 16 bytes of metadata then the 4-byte magic. Those 16 bytes line up cleanly as four 32-bit values, especially since the last 4 bytes before `DVPL` are `02 00 00 00`. I checked a couple other `.dvpl` files to see if that `02 00 00 00` was consistent:
 
-```cmd
+```console
 # customization.xml.dvpl
 00000010  54 03 00 00 6e 18 a0 f9  02 00 00 00 44 56 50 4c  |T...n.......DVPL|
 
@@ -106,7 +106,7 @@ decompressed = lz4.block.decompress(payload, uncompressed_size=34436)
 print(decompressed[:100].decode('utf-8'))
 ```
 
-```cmd
+```console
 <root>
  <Ch01_Type59>
   <id>0</id>
@@ -125,7 +125,7 @@ calculated_crc = zlib.crc32(payload) & 0xffffffff
 
 Bingo. Full footer format:
 
-```cmd
+```console
 [Compressed Payload Data]
 [Footer - 20 bytes:]
   - Original Size    (4 bytes, little-endian uint32)

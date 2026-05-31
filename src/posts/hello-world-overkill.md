@@ -37,11 +37,10 @@ sys_exit:
 ```
 
 ```c
-int main(void)
-{
-  const char msg[]  = "Hello world!";
-  long       status = sys_write(1, msg, sizeof(msg) - 1);
-  sys_exit(status < 0 ? 1 : 0);
+int main(void) {
+    const char msg[] = "Hello world!";
+    long status = sys_write(1, msg, sizeof(msg) - 1);
+    sys_exit(status < 0 ? 1 : 0);
 }
 ```
 
@@ -51,7 +50,7 @@ int main(void)
 
 That's the whole program. Once it worked I got curious how small I could get the binary. A `clang -Os -nostdlib` build with no special flags produces this:
 
-```cmd
+```console
 section                size    addr
 .note.gnu.build-id       36     904
 .interp                  28     940
@@ -85,7 +84,7 @@ Total                  1830
 
 Using that map, I made a custom linker script that throws all of that away and collapses everything into a single `PT_LOAD` segment with the load address packed directly after the ELF headers:
 
-```c
+```ini
 ENTRY(main)
 
 PHDRS
@@ -103,7 +102,7 @@ SECTIONS
 
 `FLAGS(5)` is `PF_R | PF_X`. With `-ffunction-sections -fdata-sections` on the compiler and `--strip-all --build-id=none --gc-sections` on the linker, the result is:
 
-```cmd
+```console
 section   size      addr
 .text       83   4194424
 Total       83
@@ -125,24 +124,24 @@ The original code used `wcsrchr` to strip the path prefix off `FullDllName` and 
 
 ```c
 #ifdef _WIN64
-#define read_peb() ((PPEB)__readgsqword(0x60))
+    #define read_peb() ((PPEB)__readgsqword(0x60))
 #else // x86
-#define read_peb() ((PPEB)__readfsdword(0x30))
+    #define read_peb() ((PPEB)__readfsdword(0x30))
 #endif // _WIN64
 
-static PVOID get_ntdll_base(void)
-{
-  PPEB        peb  = read_peb();
-  PPEB_LDR    ldr  = peb->Ldr;
-  LIST_ENTRY *head = &ldr->InMemoryOrderModuleList;
+static PVOID get_ntdll_base(void) {
+    PPEB peb = read_peb();
+    PPEB_LDR ldr = peb->Ldr;
+    LIST_ENTRY* head = &ldr->InMemoryOrderModuleList;
 
-  for (LIST_ENTRY *e = head->Flink; e != head; e = e->Flink)
-  {
-    PLDR_ENTRY entry = CONTAINING_RECORD(e, LDR_ENTRY, InMemoryOrderLinks);
-    if (wcs_ieq(entry->BaseDllName.Buffer, L"ntdll.dll")) return entry->DllBase;
-  }
+    for (LIST_ENTRY* e = head->Flink; e != head; e = e->Flink) {
+        PLDR_ENTRY entry = CONTAINING_RECORD(e, LDR_ENTRY, InMemoryOrderLinks);
+        if (wcs_ieq(entry->BaseDllName.Buffer, L"ntdll.dll")) {
+            return entry->DllBase;
+        }
+    }
 
-  return NULL;
+    return NULL;
 }
 ```
 
@@ -151,49 +150,44 @@ static PVOID get_ntdll_base(void)
 In case you need them, here are the full struct definitions:
 
 ```c
-typedef struct
-{
-  USHORT Length;
-  USHORT MaximumLength;
-  PWSTR  Buffer;
+typedef struct {
+    USHORT Length;
+    USHORT MaximumLength;
+    PWSTR Buffer;
 } UNICODE_STR;
 
-typedef struct
-{
-  LIST_ENTRY  InLoadOrderLinks;
-  LIST_ENTRY  InMemoryOrderLinks;
-  LIST_ENTRY  InInitializationOrderLinks;
-  PVOID       DllBase;
-  PVOID       EntryPoint;
-  ULONG       SizeOfImage;
-  UNICODE_STR FullDllName;
-  UNICODE_STR BaseDllName;
+typedef struct {
+    LIST_ENTRY InLoadOrderLinks;
+    LIST_ENTRY InMemoryOrderLinks;
+    LIST_ENTRY InInitializationOrderLinks;
+    PVOID DllBase;
+    PVOID EntryPoint;
+    ULONG SizeOfImage;
+    UNICODE_STR FullDllName;
+    UNICODE_STR BaseDllName;
 } LDR_ENTRY, *PLDR_ENTRY;
 
-typedef struct
-{
-  ULONG      Length;
-  BOOL       Initialized;
-  PVOID      SsHandle;
-  LIST_ENTRY InLoadOrderModuleList;
-  LIST_ENTRY InMemoryOrderModuleList;
-  LIST_ENTRY InInitializationOrderModuleList;
+typedef struct {
+    ULONG Length;
+    BOOL Initialized;
+    PVOID SsHandle;
+    LIST_ENTRY InLoadOrderModuleList;
+    LIST_ENTRY InMemoryOrderModuleList;
+    LIST_ENTRY InInitializationOrderModuleList;
 } PEB_LDR, *PPEB_LDR;
 
-typedef struct
-{
-  BYTE     Reserved[12];
-  PPEB_LDR Ldr;
+typedef struct {
+    BYTE Reserved[12];
+    PPEB_LDR Ldr;
 } PEB, *PPEB;
 
-typedef struct
-{
-  union
-  {
-    NTSTATUS Status;
-    PVOID    Pointer;
-  };
-  ULONG_PTR Information;
+typedef struct {
+    union {
+        NTSTATUS Status;
+        PVOID Pointer;
+    };
+
+    ULONG_PTR Information;
 } IO_STATUS_BLOCK;
 ```
 
@@ -202,23 +196,22 @@ typedef struct
 Now we have the base address. Next problem: finding `NtWriteFile` inside it. We need to parse the PE export table. The export directory has three parallel arrays: `AddressOfNames` (function name strings), `AddressOfNameOrdinals` (index into the RVA array), and `AddressOfFunctions` (RVAs). Walk `AddressOfNames`, find `"NtWriteFile"`, use the matching ordinal to index `AddressOfFunctions`, add the base. That's the stub.
 
 ```c
-for (DWORD i = 0; i < exp->NumberOfNames; i++)
-{
-  if (str_eq((char *)(base + names[i]), "NtWriteFile")) return base + funcs[ords[i]];
+for (DWORD i = 0; i < exp->NumberOfNames; i++) {
+    if (str_eq((char*)(base + names[i]), "NtWriteFile")) {
+        return base + funcs[ords[i]];
+    }
 }
 ```
 
 `str_eq` is just a hand-rolled `strcmp`:
 
 ```c
-static int str_eq(const char *a, const char *b)
-{
-  while (*a && *a == *b)
-  {
-    a++;
-    b++;
-  }
-  return *a == *b;
+static int str_eq(const char* a, const char* b) {
+    while (*a && *a == *b) {
+        a++;
+        b++;
+    }
+    return *a == *b;
 }
 ```
 
@@ -226,7 +219,7 @@ static int str_eq(const char *a, const char *b)
 
 An unhooked x64 `Nt*` stub looks like this:
 
-```cmd
+```console
 4C 8B D1        mov r10, rcx    ; kernel syscall ABI: arg0 goes in r10
 B8 08 00 00 00  mov eax, 0x08   ; SSN (varies per build)
 0F 05           syscall
@@ -236,8 +229,11 @@ C3              ret
 The first four bytes are always `4C 8B D1 B8` on an unhooked stub. If they're not, something has patched it. A hooked stub typically starts with `E9` (a near JMP) or `FF 25` (an indirect JMP through a pointer), redirecting execution to the EDR's trampoline before handing control back to the real stub. We can detect it but we can't read the SSN through the hook, so we bail:
 
 ```c
-if (stub[0] != 0x4C || stub[1] != 0x8B || stub[2] != 0xD1 || stub[3] != 0xB8) return FALSE;
-*ssn_out = *(DWORD *)(stub + 4);
+if (stub[0] != 0x4C || stub[1] != 0x8B || stub[2] != 0xD1 || stub[3] != 0xB8) {
+    return FALSE;
+}
+
+*ssn_out = *(DWORD*)(stub + 4);
 ```
 
 Bytes 4–7 are the SSN. Little-endian, cast directly.
@@ -251,14 +247,12 @@ The reason it matters: when the kernel enters on a `syscall`, it can check the r
 The scan starts at `stub + 32` to skip past the stub body itself:
 
 ```c
-BYTE *scan = stub + 32;
-for (int i = 0; i < 1024; i++, scan++)
-{
-  if (scan[0] == 0x0F && scan[1] == 0x05 && scan[2] == 0xC3)
-  {
-    *gadget_out = scan;
-    return TRUE;
-  }
+BYTE* scan = stub + 32;
+for (int i = 0; i < 1024; i++, scan++) {
+    if (scan[0] == 0x0F && scan[1] == 0x05 && scan[2] == 0xC3) {
+        *gadget_out = scan;
+        return TRUE;
+    }
 }
 ```
 
@@ -289,28 +283,28 @@ END
 `NtWriteFile` takes 9 parameters. Most are optional for a console write; you can pass `NULL` for the event handle, APC routine, APC context, byte offset, and key ([docs here](https://ntdoc.m417z.com/ntwritefile)). The one you can't skip is `IoStatusBlock`: the kernel writes the result into it, so it has to be a valid address.
 
 ```c
-int          main(void)
-{
-  const char      msg[]     = "Hello world!";
-  IO_STATUS_BLOCK iosb      = {0};
-  NtWriteFile_t   writefile = (NtWriteFile_t)(void *)NtWriteFileStub;
-  LONG            status;
+int main(void) {
+    const char msg[] = "Hello world!";
+    IO_STATUS_BLOCK iosb = {0};
+    NtWriteFile_t writefile = (NtWriteFile_t)(void*)NtWriteFileStub;
+    LONG status;
 
-  if (!resolve_ntwritefile(&ssn_value, &gadget_addr)) return 1;
+    if (!resolve_ntwritefile(&ssn_value, &gadget_addr))
+        return 1;
 
-  status = writefile(
-    GetStdHandle(STD_OUTPUT_HANDLE),
-    NULL,
-    NULL,
-    NULL,
-    &iosb,
-    (PVOID)(ULONG_PTR)msg,
-    sizeof(msg) - 1,
-    NULL,
-    NULL
-  );
+    status = writefile(
+        GetStdHandle(STD_OUTPUT_HANDLE),
+        NULL,
+        NULL,
+        NULL,
+        &iosb,
+        (PVOID)(ULONG_PTR)msg,
+        sizeof(msg) - 1,
+        NULL,
+        NULL
+    );
 
-  return status < 0 ? 1 : 0;
+    return status < 0 ? 1 : 0;
 }
 ```
 
@@ -318,7 +312,7 @@ int          main(void)
 
 Same exercise as with the ELF, but the PE header has a hard minimum size so you can't get as aggressive. Without any size optimisations the linker produces four sections:
 
-```cmd
+```console
 Name     VirtualSize   RawDataSize
 .text    0x23C (572)          1024
 .rdata   0xB4  (180)           512
@@ -329,7 +323,7 @@ Total on disk: 3072 bytes
 
 `.rdata` is read-only data (string literals, import thunks). `.pdata` is the structured exception handling table the compiler emits for every function on x64, for the Windows stack unwinder. Each section is padded to `FileAlignment` (512 bytes by default) so four sections with tiny actual content still occupy at minimum 4 × 512 = 2,048 bytes on disk, plus whatever the content rounds up to. Merging all of them into `.text` eliminates the extra section table entries and collapses four alignment boundaries into one:
 
-```cmd
+```console
 /nodefaultlib
 /entry:main
 /GS-
