@@ -180,7 +180,7 @@ static PVOID get_ntdll_base(void) {
 
 `CONTAINING_RECORD` recovers the full `LDR_DATA_TABLE_ENTRY` from the `InMemoryOrderLinks` pointer by subtracting the field's offset. All the structs (`PEB`, `PEB_LDR`, `LDR_ENTRY`) are defined manually, so no `winternl.h` needed.
 
-The struct definitions, trimmed to the fields we actually touch (`Reserved` covers everything we skip in `PEB`). _These are my definitions, not MSDN's_:
+The struct definitions, trimmed to the fields we actually touch (`Reserved` covers everything we skip in `PEB`):
 
 ```c
 typedef struct {
@@ -380,9 +380,9 @@ Code is at [MihaiStreames/hello-world-overkill](https://github.com/MihaiStreames
 
 ## References
 
-1. leetCipher. "Hello World in x64 Assembly (Windows, No CRT)." _YouTube_. [https://www.youtube.com/watch?v=4VeYn3MgilU](https://www.youtube.com/watch?v=4VeYn3MgilU)
-1. klezvirus. "Callback Hell." _2023_. [https://klezvirus.github.io/posts/Callback-Hell](https://klezvirus.github.io/posts/Callback-Hell)
-1. f00crew. "Malware Development Essentials for Operators." _2023_. [https://f00crew.org/0x33](https://f00crew.org/0x33)
-1. trickster0. "Primitive Injection." [https://trickster0.github.io/posts/Primitive-Injection](https://trickster0.github.io/posts/Primitive-Injection)
-1. s4dbrd. "How Kernel Anti-Cheats Work." [https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work](https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work)
-1. m417z. "NtWriteFile." _ntdoc_. [https://ntdoc.m417z.com/ntwritefile](https://ntdoc.m417z.com/ntwritefile)
+1. leetCipher. "Hello World in 300 lines of code to piss off vibe coders." _YouTube_. [https://www.youtube.com/watch?v=4VeYn3MgilU](https://www.youtube.com/watch?v=4VeYn3MgilU)
+1. klezvirus. "Callback hell: abusing callbacks, tail-calls, and proxy frames to obfuscate the stack." _2025_. [https://klezvirus.github.io/posts/Callback-Hell](https://klezvirus.github.io/posts/Callback-Hell)
+1. f00crew. "Malware Development Essentials for Operators." _2026_. [https://f00crew.org/0x33](https://f00crew.org/0x33)
+1. trickster0. "Primitive Injection - Breaking the Status Quo." _2025_. [https://trickster0.github.io/posts/Primitive-Injection](https://trickster0.github.io/posts/Primitive-Injection)
+1. s4dbrd. "How Kernel Anti-Cheats Work: A Deep Dive into Modern Game Protection." _2026_. [https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work](https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work)
+1. m417z. "NtWriteFile" _ntdoc_. [https://ntdoc.m417z.com/ntwritefile](https://ntdoc.m417z.com/ntwritefile)
