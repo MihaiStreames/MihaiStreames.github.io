@@ -1,7 +1,7 @@
 ---
 title: "How I reversed World of Tanks Blitz's custom DVPL format"
 date: 2025-06-06
-categories: [reverse-engineering]
+categories: [Reverse Engineering]
 tags: [file-formats, compression, lz4, python, wotb]
 excerpt: I needed tank data for a SQL assignment. Game files had it, locked behind an unknown format. This is how I got it out.
 ---

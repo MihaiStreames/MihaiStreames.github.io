@@ -1,7 +1,7 @@
 ---
 title: "What happened to performant software?"
 date: 2026-04-13
-categories: [opinion]
+categories: [Opinion]
 tags: [electron, windows, performance, bloat]
 excerpt: Software is getting worse, and I'm not sure anyone in charge actually cares.
 ---
