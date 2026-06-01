@@ -1,10 +1,8 @@
 ---
-title: Hello
-date: "2025-06-03"
-categories:
-  - meta
-tags:
-  - arch-linux
+title: "Hello"
+date: 2025-06-03
+categories: [meta]
+tags: [arch-linux]
 excerpt: Fighting Ruby, erb, and PATH at 2am to set up a blog.
 ---
 
