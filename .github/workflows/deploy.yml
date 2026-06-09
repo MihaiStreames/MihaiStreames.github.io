@@ -27,7 +27,7 @@ jobs:
         with:
           bun-version: latest
           no-cache: true
-      - run: bun install --frozen-lockfile
+      - run: bun install
 
       - name: Build
         run: bun run build
