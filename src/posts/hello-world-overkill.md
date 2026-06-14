@@ -16,28 +16,32 @@ The Windows section assumes some passing familiarity with C and Win32 or Windows
 
 ## Linux first, because it's easy
 
-Linux is boring. Not because it's simple, but because it's _clean_. The kernel has a stable syscall ABI; numbers don't change between versions and the kernel team has explicitly promised never to break userspace. You put the number in `rax`, hit `syscall`, done. `write` is `1`, `exit` is `60`.
+Linux is boring. Not because it's simple, but because it's _clean_. The kernel has a stable syscall ABI; numbers don't change between versions and the kernel team has explicitly promised never to break userspace. You put the number in `eax`, hit `syscall`, done. `write` is `1`, `exit` is `60`.
 
-> The file uses Intel syntax (`.intel_syntax noprefix`): destination first, no `%` register prefixes, it is closer to what a disassembler outputs than the AT&T default.
+The file uses NASM. `sys_write` and `sys_exit` are thin wrappers that load the syscall number and let the kernel do the rest:
 
 ```asm
-.intel_syntax noprefix
-.globl sys_write
-.globl sys_exit
+section .text
+
+global sys_write
+global sys_exit
 
 sys_write:
-    mov     rax, 1    # SYS_write
+    mov     eax, 1      ; SYS_write
     syscall
     ret
 
 sys_exit:
-    mov     rax, 60   # SYS_exit
+    mov     eax, 60     ; SYS_exit
     syscall
 ```
 
 The C side just calls them directly:
 
 ```c
+long sys_write(int fd, const void* buf, size_t len);
+__attribute__((noreturn)) void sys_exit(int code);
+
 int main(void) {
     const char msg[] = "Hello world!";
     long status = sys_write(1, msg, sizeof(msg) - 1);
@@ -45,7 +49,7 @@ int main(void) {
 }
 ```
 
-`sys_exit` has no `ret` because the kernel never returns from it.
+`sys_exit` carries `__attribute__((noreturn))`, which lets the compiler omit the dead code after the call (because the kernel never returns from it).
 
 ### Making it tiny
 
@@ -90,15 +94,13 @@ Using that map, I made a custom linker script that throws all of that away and c
 ```ld
 ENTRY(main)
 
-PHDRS
-{
+PHDRS {
   text PT_LOAD FLAGS(5);
 }
 
-SECTIONS
-{
+SECTIONS {
   . = 0x400000 + SIZEOF_HEADERS;
-  .text : { *(.text*) } :text
+  .text     : { *(.text*) } :text
   /DISCARD/ : { *(.note*) *(.comment*) *(.eh_frame*) *(.gnu*) }
 }
 ```
@@ -123,118 +125,15 @@ The starting point was leetCipher's approach: walk the PEB to find `ntdll`, pars
 
 ### Walking the PEB
 
-`GS:[0x60]` on x64 (or `FS:[0x30]` on x86) holds the PEB address, so that's one less API call needed. `Ldr->InMemoryOrderModuleList` is a doubly-linked list of every loaded module. `ntdll.dll` is always in there (alongside `kernel32.dll`); it's the first DLL the loader maps before anything else runs.
+`GS:[0x30]` on x64 (or `FS:[0x18]` on x86) holds the TEB address. The TEB ([Thread Environment Block](https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-teb)) contains a pointer to the PEB ([Process Environment Block](https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb)), which in turn contains `Ldr->InMemoryOrderModuleList` - a doubly-linked list of every loaded module. `ntdll.dll` is always in there; it's the first DLL the loader maps before anything else runs.
 
-The original code used `wcsrchr` to strip the path prefix off `FullDllName` and then `wcscmp`. I switched to matching on `BaseDllName` directly (it's already just the filename, no path) and wrote them by hand to avoid pulling in any string functions:
+Rather than simply string-comparing module names, I hash them with [djb2](http://www.cse.yorku.ca/~oz/hash.html) at lookup time and compare against a precomputed constant. Same for the export name search. _This was a little bonus I found in [Tartarus' Gate](https://github.com/trickster0/TartarusGate) and decided to reuse._
 
-```c
-static int str_eq(const char* a, const char* b) {
-    while (*a && *a == *b) {
-        a++;
-        b++;
-    }
-
-    return *a == *b;
-}
-
-static int wcs_ieq(const WCHAR* a, const WCHAR* b) {
-    while (*a && *b) {
-        WCHAR ca = (*a >= L'A' && *a <= L'Z') ? *a + 32 : *a;
-        WCHAR cb = (*b >= L'A' && *b <= L'Z') ? *b + 32 : *b;
-        if (ca != cb) {
-            return 0;
-        }
-
-        a++;
-        b++;
-    }
-
-    return *a == *b;
-}
-```
-
-With that in place, the PEB walk is straightforward:
-
-```c
-#ifdef _WIN64
-    #define read_peb() ((PPEB)__readgsqword(0x60))
-#else // x86
-    #define read_peb() ((PPEB)__readfsdword(0x30))
-#endif // _WIN64
-
-static PVOID get_ntdll_base(void) {
-    PPEB peb = read_peb();
-    PPEB_LDR ldr = peb->Ldr;
-    LIST_ENTRY* head = &ldr->InMemoryOrderModuleList;
-
-    for (LIST_ENTRY* e = head->Flink; e != head; e = e->Flink) {
-        PLDR_ENTRY entry = CONTAINING_RECORD(e, LDR_ENTRY, InMemoryOrderLinks);
-        if (wcs_ieq(entry->BaseDllName.Buffer, L"ntdll.dll")) {
-            return entry->DllBase;
-        }
-    }
-
-    return NULL;
-}
-```
-
-`CONTAINING_RECORD` recovers the full `LDR_DATA_TABLE_ENTRY` from the `InMemoryOrderLinks` pointer by subtracting the field's offset. All the structs (`PEB`, `PEB_LDR`, `LDR_ENTRY`) are defined manually, so no `winternl.h` needed.
-
-The struct definitions, trimmed to the fields we actually touch (`Reserved` covers everything we skip in `PEB`):
-
-```c
-typedef struct {
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR Buffer;
-} UNICODE_STR;
-
-typedef struct {
-    LIST_ENTRY InLoadOrderLinks;
-    LIST_ENTRY InMemoryOrderLinks;
-    LIST_ENTRY InInitializationOrderLinks;
-    PVOID DllBase;
-    PVOID EntryPoint;
-    ULONG SizeOfImage;
-    UNICODE_STR FullDllName;
-    UNICODE_STR BaseDllName;
-} LDR_ENTRY, *PLDR_ENTRY;
-
-typedef struct {
-    ULONG Length;
-    BOOL Initialized;
-    PVOID SsHandle;
-    LIST_ENTRY InLoadOrderModuleList;
-    LIST_ENTRY InMemoryOrderModuleList;
-    LIST_ENTRY InInitializationOrderModuleList;
-} PEB_LDR, *PPEB_LDR;
-
-typedef struct {
-    BYTE Reserved[12];
-    PPEB_LDR Ldr;
-} PEB, *PPEB;
-
-typedef struct {
-    union {
-        NTSTATUS Status;
-        PVOID Pointer;
-    };
-
-    ULONG_PTR Information;
-} IO_STATUS_BLOCK;
-```
+`CONTAINING_RECORD` recovers the full `LDR_DATA_TABLE_ENTRY` from the `InMemoryOrderLinks` pointer by subtracting the field's offset.
 
 ### Parsing the export directory
 
-Now we have the base address. Next problem: finding `NtWriteFile` inside it. We need to parse the PE export table. The export directory has three parallel arrays: `AddressOfNames` (function name strings), `AddressOfNameOrdinals` (index into the RVA array), and `AddressOfFunctions` (RVAs). Walk `AddressOfNames`, find `"NtWriteFile"`, use the matching ordinal to index `AddressOfFunctions`, add the base. That's the stub.
-
-```c
-for (DWORD i = 0; i < exp->NumberOfNames; i++) {
-    if (str_eq((char*)(base + names[i]), "NtWriteFile")) {
-        return base + funcs[ords[i]];
-    }
-}
-```
+Now we have the base address. The PE export directory has three parallel arrays: `AddressOfNames` (function name strings), `AddressOfNameOrdinals` (index into the RVA array), and `AddressOfFunctions` (RVAs). Walk `AddressOfNames`, find the entry whose `djb2` hash matches `NtWriteFile`'s precomputed hash, use the matching ordinal to index `AddressOfFunctions`, add the base. That's the stub.
 
 ### Extracting the SSN
 
@@ -247,108 +146,40 @@ B8 08 00 00 00  mov eax, 0x08   ; SSN (varies per build)
 C3              ret
 ```
 
-The first four bytes are always `4C 8B D1 B8` on an unhooked stub. If they're not, something has patched it. A hooked stub typically starts with `E9` (a near JMP) or `FF 25` (an indirect JMP through a pointer), redirecting execution to the EDR's trampoline before handing control back to the real stub. We can detect it but we can't read the SSN through the hook, so we bail:
+The first four bytes are always `4C 8B D1 B8` on an unhooked stub. If they're not, something (most likely an EDR) has patched it - typically with `E9` (a near JMP) at byte 0 or byte 3, redirecting execution to a trampoline. In that case, reading the SSN directly is impossible.
 
-```c
-if (stub[0] != 0x4C || stub[1] != 0x8B || stub[2] != 0xD1 || stub[3] != 0xB8) {
-    return FALSE;
-}
-
-*ssn_out = *(DWORD*)(stub + 4);
-```
-
-Bytes 4–7 are the SSN. Little-endian, cast directly.
+The fallback is using neighbor scanning ([Tartarus' Gate](https://github.com/trickster0/TartarusGate) style): walk adjacent stubs up and down until one is unhooked, read its SSN, then infer the target's SSN via offset. Adjacent `Nt*` stubs have consecutive SSNs, so if the neighbor at distance `n` has SSN `k`, the target's SSN is `k +- n`.
 
 ### Finding a gadget
 
-Now we have both the SSN and the stub address. We can't just emit a `syscall` instruction in our own binary and be done with it; that's where the EDR problem starts. Instead, we scan `ntdll` for a `syscall; ret` sequence (`0F 05 C3`) and jump into it. This is the indirect syscall technique, covered in depth by [klezvirus](https://klezvirus.github.io/posts/Callback-Hell).
+Now we have the SSN. We can't just emit a `syscall` instruction in our own binary; EDR kernel drivers periodically walk thread stacks using `RtlWalkFrameChain` or `RtlCaptureStackBackTrace`, checking each return address against the list of loaded modules. A return address pointing into your binary rather than into `ntdll` is immediately suspicious. Jumping into a gadget inside `ntdll` makes the return address look like a normal stub invocation.
 
-The reason it matters: EDR kernel drivers periodically walk thread stacks using `RtlWalkFrameChain` or `RtlCaptureStackBackTrace`, checking each return address against the list of loaded modules. A return address pointing into your binary rather than into `ntdll` is immediately suspicious - no legitimate caller emits a `syscall` instruction outside of ntdll's stub region. Jumping into a gadget inside `ntdll` makes the return address look like a normal stub invocation. The APC-based stack inspection mechanism is covered in more detail in [how kernel anti-cheats work](https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work).
-
-The scan starts at `stub + 32` to clear the current stub. The unhooked body is 11 bytes, but starting at +8 would immediately match the stub's own `0F 05 C3`. Starting at +32 lands in the gap between adjacent stubs, where the next one's `syscall; ret` is almost always sitting:
-
-```c
-BYTE* scan = stub + 32;
-for (int i = 0; i < 1024; i++, scan++) {
-    if (scan[0] == 0x0F && scan[1] == 0x05 && scan[2] == 0xC3) {
-        *gadget_out = scan;
-        return TRUE;
-    }
-}
-```
-
-In practice it hits almost immediately; there's a gadget right after the next adjacent stub.
+Rather than scanning from a stub offset, I walk `ntdll`'s PE section headers directly, find `.text` by name, and scan the entire section for a `syscall; ret` sequence (`0F 05 C3`). This is the indirect syscall technique, covered in depth by [klezvirus](https://klezvirus.github.io/posts/Callback-Hell). The APC-based stack inspection mechanism that makes it necessary is covered in more detail in [how kernel anti-cheats work](https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work).
 
 ### The syscall stub in MASM
 
-The actual dispatch is two instructions. `ssn_value` and `gadget_addr` are globals that `resolve_ntwritefile` fills before this gets called:
+The actual dispatch is three instructions. The `mov r10, rcx` is mandatory as the Windows x64 syscall ABI requires the first argument in `r10` when entering the kernel, not `rcx` as in the normal calling convention.
 
 ```asm
-EXTERN ssn_value:DWORD
-EXTERN gadget_addr:QWORD
+EXTERN dwSSN:DWORD
+EXTERN pvGadget:QWORD
 
 .code
-
-NtWriteFileStub PROC
-    mov     eax, DWORD PTR [ssn_value]    ; syscall number (zero-extends to rax)
-    jmp          QWORD PTR [gadget_addr]  ; -> ntdll "syscall; ret" gadget
-NtWriteFileStub ENDP
-
-END
+    NtWriteFileStub PROC
+        mov     r10, rcx
+        mov     eax, DWORD PTR [dwSSN]
+        jmp          QWORD PTR [pvGadget]
+    NtWriteFileStub ENDP
+end
 ```
 
-`mov eax, ...` on x64 implicitly zeroes the upper 32 bits of `rax`, so the full register holds just the SSN by the time `syscall` reads it.
+_`mov eax, ...` on x64 implicitly zeroes the upper 32 bits of `rax`, so the full register holds just the SSN by the time `syscall` reads it._
 
 ### Calling NtWriteFile
 
 `NtWriteFile` takes 9 parameters. Most are optional for a console write; you can pass `NULL` for the event handle, APC routine, APC context, byte offset, and key (see [`NtWriteFile` on ntdoc](https://ntdoc.m417z.com/ntwritefile)). The one you can't skip is `IoStatusBlock`: the kernel writes the result into it, so it has to be a valid address.
 
-The typedef used to call through the stub (matching the NT signature):
-
-```c
-typedef LONG (NTAPI *NtWriteFile_t)(
-    HANDLE           FileHandle,
-    HANDLE           Event,
-    PVOID            ApcRoutine,
-    PVOID            ApcContext,
-    IO_STATUS_BLOCK* IoStatusBlock,
-    PVOID            Buffer,
-    ULONG            Length,
-    PLARGE_INTEGER   ByteOffset,
-    PULONG           Key
-);
-```
-
-Putting it all together:
-
-```c
-int main(void) {
-    const char msg[] = "Hello world!";
-    IO_STATUS_BLOCK iosb = {0};
-    NtWriteFile_t writefile = (NtWriteFile_t)(void*)NtWriteFileStub;
-    LONG status;
-
-    if (!resolve_ntwritefile(&ssn_value, &gadget_addr)) {
-        return 1;
-    }
-
-    status = writefile(
-        GetStdHandle(STD_OUTPUT_HANDLE),
-        NULL,
-        NULL,
-        NULL,
-        &iosb,
-        (PVOID)(ULONG_PTR)msg,
-        sizeof(msg) - 1,
-        NULL,
-        NULL
-    );
-
-    return status < 0 ? 1 : 0;
-}
-```
-
-_[`GetStdHandle`](https://learn.microsoft.com/en-us/windows/console/getstdhandle) is the one concession to Win32 here. The stdout handle is accessible without it via `NtCurrentPeb()->ProcessParameters->StandardOutput`, but the extra struct definitions aren't worth it for the scope of this project._
+The full `NtWriteFile_t` typedef and `main` are in the repo. _The only notable thing is `GetStdHandle` - the one Win32 concession. The stdout handle is accessible without it via `NtCurrentPeb()->ProcessParameters->StandardOutput`, but the extra struct definitions aren't worth it for the scope of this project._
 
 ### Shrinking the .exe
 
@@ -376,6 +207,10 @@ Total on disk: 3072 bytes
 
 `/nodefaultlib` drops the CRT entirely, `/entry:main` skips the startup wrapper, `/GS-` removes the [stack cookie check](https://en.wikipedia.org/wiki/Buffer_overflow_protection). Result: **1,536 bytes**.
 
+## Final Notes
+
+A few cool things that I didn't cover here but that I might look into in the future (I discovered them while working on this project) are unhooking (detecting and restoring a hooked stub beyond neighbor scanning) and removing the `GetStdHandle` dependency entirely _(this requires a bit of reverse engineering)_.
+
 Code is at [MihaiStreames/hello-world-overkill](https://github.com/MihaiStreames/hello-world-overkill).
 
 ## References
@@ -385,4 +220,4 @@ Code is at [MihaiStreames/hello-world-overkill](https://github.com/MihaiStreames
 1. f00crew. "Malware Development Essentials for Operators." _2026_. [https://f00crew.org/0x33](https://f00crew.org/0x33)
 1. trickster0. "Primitive Injection - Breaking the Status Quo." _2025_. [https://trickster0.github.io/posts/Primitive-Injection](https://trickster0.github.io/posts/Primitive-Injection)
 1. s4dbrd. "How Kernel Anti-Cheats Work: A Deep Dive into Modern Game Protection." _2026_. [https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work](https://s4dbrd.github.io/posts/how-kernel-anti-cheats-work)
-1. m417z. "NtWriteFile" _ntdoc_. [https://ntdoc.m417z.com/ntwritefile](https://ntdoc.m417z.com/ntwritefile)
+1. m417z. "NtWriteFile." _ntdoc_. [https://ntdoc.m417z.com/ntwritefile](https://ntdoc.m417z.com/ntwritefile)
