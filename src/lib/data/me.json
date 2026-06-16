@@ -16,14 +16,9 @@
       "description": "dqn agent for Downwell (WIP)"
     },
     {
-      "name": "psnpp-gist",
-      "url": "https://github.com/MihaiStreames/psnpp-gist",
-      "description": "companion userscript for psnp+ (adds gist sync support)"
-    },
-    {
-      "name": "PoneyHot",
-      "url": "https://github.com/MihaiStreames/PoneyHot",
-      "description": "cool little observability stack project for uni",
+      "name": "anyhow-cpp",
+      "url": "https://github.com/MihaiStreames/anyhow-cpp",
+      "description": "anyhow, ported to cpp20",
       "collaborators": [
         {
           "name": "BelmuTM",
@@ -43,15 +38,14 @@
       ]
     },
     {
-      "name": "guard-core-rs",
-      "url": "https://github.com/rennf93/guard-core-rs",
-      "description": "porting guard-core to rust",
-      "collaborators": [
-        {
-          "name": "rennf93",
-          "url": "https://github.com/rennf93"
-        }
-      ]
+      "name": "hello-world-overkill",
+      "url": "https://github.com/MihaiStreames/hello-world-overkill",
+      "description": "bypassing libc + win32 kernel to reach the NT kernel"
+    },
+    {
+      "name": "psnpp-gist",
+      "url": "https://github.com/MihaiStreames/psnpp-gist",
+      "description": "companion userscript for psnp+ (adds gist sync support)"
     }
   ],
   "links": [

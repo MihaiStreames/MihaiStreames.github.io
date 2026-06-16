@@ -3,7 +3,7 @@ title: "Hello"
 date: 2025-06-03
 categories: [Meta]
 tags: [arch-linux]
-excerpt: Fighting Ruby, erb, and PATH at 2am to set up a blog.
+excerpt: Fighting Ruby and erb at 2am to set up my blog.
 ---
 
 I decided to make this blog at some absurd hour of the night, mostly cause I had nothing better to do. Took me a bit to figure out how [GitHub Pages](https://pages.github.com/) and [Jekyll](https://jekyllrb.com/) actually fit together, but the gist is Jekyll generates static HTML and GitHub Pages hosts it for free.

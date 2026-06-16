@@ -18,6 +18,7 @@ const highlighter = await createHighlighter({
     "json",
     "makefile",
     "python",
+    "powershell",
     "rust",
     "text",
     "toml",
