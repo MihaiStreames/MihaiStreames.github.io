@@ -1,9 +1,9 @@
 ---
-title: "How I reversed World of Tanks Blitz's custom DVPL format"
+title: "Reversing World of Tanks Blitz's custom DVPL format"
 date: 2025-06-06
 categories: [Reverse Engineering]
 tags: [file-formats, compression, lz4, python, wotb]
-excerpt: I needed tank data for a SQL assignment. Game files had it, locked behind an unknown format. This is how I got it out.
+excerpt: A simple reverse engineering approach to World of Tanks Blitz's custom DVPL format.
 ---
 
 I was trying to learn SQL for a Database course at uni and figured the most painless way was to build something I actually cared about, so I went with a tank database for [World of Tanks Blitz](https://wargaming.net/en/games/wotb). After a few hours of manually copying data and burning out, I realized I needed to scrape from somewhere. The [Wiki](https://wot-blitz.fandom.com) only has partial data, the [Main Wiki](https://wiki.wargaming.net/en/WoT_Blitz) is worse, I tried reversing some [protobuf](https://protobuf.dev/overview/) files looking for a clean dump, nothing useful. Eventually I started poking at the actual game install directory and ran into a pile of `.dvpl` files. Not a format I recognized.
